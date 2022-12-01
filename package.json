@@ -1,5 +1,5 @@
 {
-  "name": "logseq-memos-plugin",
+  "name": "logseq-memos-sync",
   "version": "0.0.0",
   "main": "dist/index.html",
   "scripts": {
@@ -39,7 +39,7 @@
     "vite-plugin-logseq": "1.1.2"
   },
   "logseq": {
-    "id": "_eindex-logseq-memos-plugin",
+    "id": "_eindex-logseq-memos-sync",
     "icon": "./logo.webp"
   }
 }

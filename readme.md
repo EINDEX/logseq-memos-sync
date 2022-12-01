@@ -1,4 +1,4 @@
-# logseq-memos-plugin
+# logseq-memos-sync
 
 > A memos sync plugin for logseq
 
