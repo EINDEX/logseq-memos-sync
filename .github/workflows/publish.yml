@@ -6,8 +6,8 @@ name: Releases
 # Controls when the action will run.
 on:
   push:
-    tags:
-      - "*" # Push events to matching any tag format, i.e. 1.0, 20.15.10
+    branches:
+      - "master" # Push events to matching any tag format, i.e. 1.0, 20.15.10
   workflow_dispatch:
     
 
@@ -38,4 +38,3 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
