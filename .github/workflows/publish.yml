@@ -2,16 +2,17 @@
 
 name: Releases
 
-env:
-  PLUGIN_NAME: logseq-plugin-template-react
 
 # Controls when the action will run.
 on:
-  # push:
-  #   branches:
-  #     - "master"
-  # Allows you to run this workflow manually from the Actions tab
+  push:
+    branches:
+      - "master" # Push events to matching any tag format, i.e. 1.0, 20.15.10
   workflow_dispatch:
+    
+
+env:
+  PLUGIN_NAME: logseq-memos-sync
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:

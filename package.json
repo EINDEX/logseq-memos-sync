@@ -1,6 +1,6 @@
 {
-  "name": "logseq-plugin-template-react",
-  "version": "0.0.0",
+  "name": "logseq-memos-sync",
+  "version": "0.1.0",
   "main": "dist/index.html",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,8 @@
   "license": "MIT",
   "dependencies": {
     "@logseq/libs": "^0.0.10",
+    "axios": "^1.2.0",
+    "date-fns": "^2.29.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -37,7 +39,7 @@
     "vite-plugin-logseq": "1.1.2"
   },
   "logseq": {
-    "id": "_pengx17-logseq-template-react",
-    "icon": "./logo.svg"
+    "id": "_eindex-logseq-memos-sync",
+    "icon": "./logo.webp"
   }
 }
