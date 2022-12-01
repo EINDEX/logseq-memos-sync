@@ -21,6 +21,12 @@
 - if memo exist, cannot update the content.
 - can not sync content from logseq to memos.
 
+## ScreenShot
+
+![](docs/memos.png)
+
+![](docs/logseq.png)
+
 ## Thanks
 
 - [Memos](https://github.com/usememos/memos)
