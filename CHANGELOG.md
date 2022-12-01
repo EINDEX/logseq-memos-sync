@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/EINDEX/logseq-memos-sync/compare/v1.0.0...v1.0.1) (2022-12-01)
+
+
+### Bug Fixes
+
+* **release:** fix release zip file name ([339f3cb](https://github.com/EINDEX/logseq-memos-sync/commit/339f3cb1b2dc20929f93730300c30002594f3e14))
+
 # 1.0.0 (2022-12-01)
 
 
