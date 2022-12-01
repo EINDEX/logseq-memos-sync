@@ -1,3 +1,13 @@
+# 1.0.0 (2022-12-01)
+
+
+* build!: build logseq-memos-plugin ([78a2506](https://github.com/EINDEX/logseq-memos-sync/commit/78a2506f47fbf328b7a8014c8866ccbe0892a113))
+
+
+### BREAKING CHANGES
+
+* New Logseq Plugin.
+
 ## [2.1.1](https://github.com/pengx17/logseq-plugin-template-react/compare/v2.1.0...v2.1.1) (2022-03-24)
 
 
