@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/EINDEX/logseq-memos-sync/compare/v1.0.1...v1.0.2) (2022-12-02)
+
+
+### Bug Fixes
+
+* **package:** image cannot load ([32d78cf](https://github.com/EINDEX/logseq-memos-sync/commit/32d78cf5e2366f0a2565e084a419cdf47c2edb25))
+
 ## [1.0.1](https://github.com/EINDEX/logseq-memos-sync/compare/v1.0.0...v1.0.1) (2022-12-01)
 
 
