@@ -30,3 +30,7 @@
 ## Thanks
 
 - [Memos](https://github.com/usememos/memos)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=eindex/logseq-memos-sync&type=Date)](https://star-history.com/#eindex/logseq-memos-sync&Date)
