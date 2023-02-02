@@ -15,7 +15,13 @@ function main() {
     key: "includeArchive",
     type: "boolean",
     title: "Include archive",
-    description: "Also sync archive memos",
+    description: "Sync archive memos",
+    default: false,
+  },{
+    key: "autoSync",
+    type: "boolean",
+    title: "Auto Sync",
+    description: "Also sync when open Logseq",
     default: false,
   },{
     key: "mode",
@@ -33,8 +39,11 @@ function main() {
     default: "Memos",
   }])
 
+  const memosSync = new MemosSync();
+
   logseq.App.registerCommandPalette({key: "sync-memos", label: "Sync Memos"} , async (e: IHookEvent) => {
-    (new MemosSync()).syncMemos()
+    logseq.UI.showMsg("Staring Sync Memos");
+    memosSync.syncMemos()
   })
 }
 

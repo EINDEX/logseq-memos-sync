@@ -71,6 +71,7 @@ class MemosSync {
   private openId: string | undefined;
   private host: string | undefined;
   private includeArchive: boolean | undefined;
+  private autoSync: boolean | undefined;
 
   constructor() {
     this.parseSetting()
@@ -82,11 +83,18 @@ class MemosSync {
   public async syncMemos() {
     try {
       await this.sync();
+      logseq.UI.showMsg("Moes Sync Success", "success");
     } catch (e) {
       console.error(e);
       logseq.UI.showMsg(String(e), "error");
     }
   }
+
+  public async autoSyncWhenStartLogseq() {
+    if (this.autoSync) {
+      await this.syncMemos();
+    }
+  }  
 
   private openAPI() {
     const url = new URL(`${this.host}/api/memo`)
@@ -100,7 +108,7 @@ class MemosSync {
 
   private parseSetting() {
     try {
-      const { openAPI, mode, customPage, includeArchive } : any = logseq.settings;
+      const { openAPI, mode, customPage, includeArchive, autoSync } : any = logseq.settings;
       const openAPIURL = new URL(openAPI);
       this.host = openAPIURL.origin;
       const openId = openAPIURL.searchParams.get("openId");
@@ -109,8 +117,10 @@ class MemosSync {
       }
       this.openId = openId;
       this.mode = mode;
+      this.autoSync = autoSync;
       this.customPage = customPage;
       this.includeArchive = includeArchive;
+      this.autoSyncWhenStartLogseq();
     } catch (e) {
       console.error(e)
       logseq.UI.showMsg( "Memos OpenAPI is not a URL", "error");
@@ -118,7 +128,6 @@ class MemosSync {
   }
 
   private async sync() {
-    logseq.UI.showMsg("Staring Sync Memos");
     const memos = await this.fetchMemos();
     for (const memo of memos) {
       const existMemo = await searchExistsMemo(memo.id);
@@ -127,6 +136,8 @@ class MemosSync {
       }
     }
   }
+
+
 
   private async generateParentBlock(
     memo: Memo,

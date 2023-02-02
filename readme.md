@@ -7,6 +7,7 @@
 ## Features
 
 - Sync memos to logseq via memos openAPI
+- Auto Sync memos when start Logseq
 
 ## How to use
 
