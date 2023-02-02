@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/EINDEX/logseq-memos-sync/compare/v1.0.2...v1.1.0) (2023-02-02)
+
+
+### Features
+
+* auto sync memos when start logseq ([c2e3d38](https://github.com/EINDEX/logseq-memos-sync/commit/c2e3d3816b3f03c6d58eff4735068343b3a79839))
+
 ## [1.0.2](https://github.com/EINDEX/logseq-memos-sync/compare/v1.0.1...v1.0.2) (2022-12-02)
 
 
