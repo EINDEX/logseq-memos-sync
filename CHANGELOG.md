@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/EINDEX/logseq-memos-sync/compare/v1.1.0...v1.2.0) (2023-02-28)
+
+
+### Features
+
+* support background sync ([2888da4](https://github.com/EINDEX/logseq-memos-sync/commit/2888da46c4f366871224f4ad9c39026e06bfe274))
+
 # [1.1.0](https://github.com/EINDEX/logseq-memos-sync/compare/v1.0.2...v1.1.0) (2023-02-02)
 
 
