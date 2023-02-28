@@ -72,21 +72,28 @@ class MemosSync {
   private host: string | undefined;
   private includeArchive: boolean | undefined;
   private autoSync: boolean | undefined;
+  private backgroundSync: string | undefined;
+  private backgroundNotify: boolean | undefined;
+  private timerId: NodeJS.Timer | undefined;
 
   constructor() {
-    this.parseSetting()
+    this.parseSetting();
   }
 
   /**
    * syncMemos
    */
-  public async syncMemos() {
+  public async syncMemos(mode = "Manual") {
     try {
       await this.sync();
-      logseq.UI.showMsg("Moes Sync Success", "success");
+      if (mode !== "Background" || this.backgroundNotify) {
+        logseq.UI.showMsg("Moes Sync Success", "success");
+      }
     } catch (e) {
       console.error(e);
-      logseq.UI.showMsg(String(e), "error");
+      if (mode !== "Background" || this.backgroundNotify) {
+        logseq.UI.showMsg(String(e), "error");
+      }
     }
   }
 
@@ -94,21 +101,53 @@ class MemosSync {
     if (this.autoSync) {
       await this.syncMemos();
     }
-  }  
-
-  private openAPI() {
-    const url = new URL(`${this.host}/api/memo`)
-    url.searchParams.append("openId", String(this.openId))
-    if (!this.includeArchive){
-      url.searchParams.append("rowStatus", "NORMAL")
-    }
-    url.searchParams.append("limit", "1000")
-    return url.toString()
   }
 
-  private parseSetting() {
+  private timeSpentByConfig(word: string): number {
+    switch (word) {
+      case "Hourly":
+        return 60 * 60 * 1000;
+      case "Half-Hourly":
+        return 30 * 60 * 1000;
+      case "Bi-Hourly":
+        return 2 * 60 * 60 * 1000;
+      default:
+        return 60 * 60 * 1000;
+    }
+  }
+
+  private backgroundConfigChange() {
+    if (this.timerId) {
+      clearInterval(this.timerId);
+    }
+    if (this.backgroundSync) {
+      this.timerId = setInterval(() => {
+        this.syncMemos("Background");
+      }, this.timeSpentByConfig(this.backgroundSync));
+    }
+  }
+
+  private openAPI() {
+    const url = new URL(`${this.host}/api/memo`);
+    url.searchParams.append("openId", String(this.openId));
+    if (!this.includeArchive) {
+      url.searchParams.append("rowStatus", "NORMAL");
+    }
+    url.searchParams.append("limit", "1000");
+    return url.toString();
+  }
+
+  public parseSetting() {
     try {
-      const { openAPI, mode, customPage, includeArchive, autoSync } : any = logseq.settings;
+      const {
+        openAPI,
+        mode,
+        customPage,
+        includeArchive,
+        autoSync,
+        backgroundSync,
+        backgroundNotify,
+      }: any = logseq.settings;
       const openAPIURL = new URL(openAPI);
       this.host = openAPIURL.origin;
       const openId = openAPIURL.searchParams.get("openId");
@@ -120,10 +159,13 @@ class MemosSync {
       this.autoSync = autoSync;
       this.customPage = customPage;
       this.includeArchive = includeArchive;
-      this.autoSyncWhenStartLogseq();
+      this.backgroundSync = backgroundSync;
+      this.backgroundNotify = backgroundNotify;
+
+      this.backgroundConfigChange();
     } catch (e) {
-      console.error(e)
-      logseq.UI.showMsg( "Memos OpenAPI is not a URL", "error");
+      console.error(e);
+      logseq.UI.showMsg("Memos OpenAPI is not a URL", "error");
     }
   }
 
@@ -136,8 +178,6 @@ class MemosSync {
       }
     }
   }
-
-
 
   private async generateParentBlock(
     memo: Memo,
