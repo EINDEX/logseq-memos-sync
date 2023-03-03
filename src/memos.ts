@@ -20,11 +20,15 @@ type ListMemo = {
   data: Memo[];
 };
 
+type SingleMemo = {
+  data: Memo;
+};
+
 const searchExistsMemo = async (
   memoId: number
 ): Promise<BlockEntity | null> => {
   const memo_blocks: BlockEntity[] | null = await logseq.DB.q(
-    `(property memoid ${memoId})`
+    `(property memoId ${memoId})`
   );
   if (memo_blocks && memo_blocks.length > 0) {
     return memo_blocks[0];
@@ -169,6 +173,13 @@ class MemosSync {
     }
   }
 
+  public async publish(block: BlockEntity) {
+    const memo = await this.postMemo(block.content)
+    console.log(`${memo.id}`)
+    await logseq.Editor.upsertBlockProperty(block.uuid, "memoId", memo.id);
+    await logseq.UI.showMsg("Post memo success");
+  }
+
   private async sync() {
     const memos = await this.fetchMemos();
     for (const memo of memos) {
@@ -185,7 +196,7 @@ class MemosSync {
   ): Promise<BlockEntity | null> {
     const opts = {
       properties: {
-        memoid: memo.id,
+        memoId: memo.id,
       },
     };
     if (this.mode === "Custom Page") {
@@ -228,6 +239,19 @@ class MemosSync {
 
   private async fetchMemos(): Promise<Memo[]> {
     const resp: AxiosResponse<ListMemo> = await axios.get(this.openAPI());
+    if (resp.status !== 200) {
+      logseq.Request;
+      throw "Connect issue";
+    }
+    return resp.data.data;
+  }
+
+  private async postMemo(content: string, visibility = "PUBLIC"): Promise<Memo> {
+    const payload = {
+      "content": `${content}`,
+      "visibility": `${visibility}`
+    }
+    const resp: AxiosResponse<SingleMemo> = await axios.post(this.openAPI(), payload);
     if (resp.status !== 200) {
       logseq.Request;
       throw "Connect issue";
