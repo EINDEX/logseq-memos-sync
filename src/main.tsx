@@ -1,6 +1,6 @@
 import "@logseq/libs";
 
-import { IHookEvent } from "@logseq/libs/dist/LSPlugin";
+import {BlockEntity, IHookEvent} from "@logseq/libs/dist/LSPlugin";
 import MemosSync from "./memos";
 
 function main() {
@@ -77,6 +77,13 @@ function main() {
     console.log(e);
     memosSync.parseSetting();
   });
+
+  logseq.Editor.registerSlashCommand("Post memo", async () => {
+    const entity: BlockEntity | null = await logseq.Editor.getCurrentBlock()
+    if (entity) {
+      await memosSync.publish(entity);
+    }
+  },);
 
   memosSync.autoSyncWhenStartLogseq();
 }
