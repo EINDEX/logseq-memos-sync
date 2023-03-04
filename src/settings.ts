@@ -74,6 +74,14 @@ export default function settingSchema() {
           "Messages will be pasted in daily journal into block with text, specified in inboxName property. Replace it in case of necessary.",
       default: "#Memos",
     },
+    {
+      key: "archiveMemoAfterSync",
+      type: "boolean",
+      title: "Archive memo after sync",
+      description:
+          "If this option is on, memos will be archived after sync to Logseq, use it only when you know what are you doing",
+      default: "false",
+    },
     // {
     //   key: "",
     //   type: "heading",
@@ -81,15 +89,15 @@ export default function settingSchema() {
     //   title: "Sync to Memos",
     //   description: "send information to memos",
     // },
-    // {
-    //   key: "sendVisibility",
-    //   type: "enum",
-    //   title: "Default Visibility for send block to memos",
-    //   description:
-    //     "Sending block back to memos, what is the default visibility?",
-    //   default: "Private",
-    //   enumChoices: ["Public", "Protected", "Private"],
-    //   enumPicker: "select",
-    // },
+    {
+      key: "sendVisibility",
+      type: "enum",
+      title: "Default Visibility for send block to memos",
+      description:
+          "Sending block back to memos, what is the default visibility?",
+      default: "Private",
+      enumChoices: ["Public", "Protected", "Private"],
+      enumPicker: "select",
+    },
   ]);
 }
