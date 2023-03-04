@@ -1,8 +1,7 @@
 import "@logseq/libs";
-import { BlockEntity, IBatchBlock } from "@logseq/libs/dist/LSPlugin";
-import axios from "axios";
-import { AxiosResponse } from "axios";
-import { format } from "date-fns";
+import {BlockEntity, IBatchBlock} from "@logseq/libs/dist/LSPlugin";
+import axios, {AxiosResponse} from "axios";
+import {format} from "date-fns";
 
 const BREAK_LINE = "!!!-!!!";
 
@@ -80,6 +79,7 @@ class MemosSync {
   private backgroundSync: string | undefined;
   private backgroundNotify: boolean | undefined;
   private groupMemos: boolean | undefined;
+  private archiveMemoAfterSync: boolean | undefined;
   private inboxName: string | undefined;
   private timerId: NodeJS.Timer | undefined;
   private sendVisibility: string | undefined;
@@ -157,6 +157,7 @@ class MemosSync {
         backgroundNotify,
         groupMemos,
         inboxName,
+        archiveMemoAfterSync,
         sendVisibility,
       }: any = logseq.settings;
       const openAPIURL = new URL(openAPI);
@@ -173,6 +174,7 @@ class MemosSync {
       this.backgroundSync = backgroundSync;
       this.backgroundNotify = backgroundNotify;
       this.groupMemos = groupMemos;
+      this.archiveMemoAfterSync = archiveMemoAfterSync;
       this.inboxName = inboxName;
       this.sendVisibility = sendVisibility.toUpperCase();
 
@@ -216,6 +218,9 @@ class MemosSync {
       const existMemo = await searchExistsMemo(memo.id);
       if (!existMemo) {
         await this.insertMemo(memo);
+        if (this.archiveMemoAfterSync) {
+          await this.archiveMemo(memo.id);
+        }
       }
     }
   }
@@ -329,16 +334,7 @@ class MemosSync {
       content: `${this.filterOutProperties(content)}`,
       visibility: `${visibility}`,
     };
-    const resp: AxiosResponse<SingleMemo> = await axios.patch(
-      `${this.openAPI(`/api/memo/${memoId}`)}`,
-      payload
-    );
-    if (resp.status !== 200) {
-      throw "Connect issue";
-    } else if (resp.status >= 400 || resp.status < 500) {
-      logseq.UI.showMsg(resp.data.message, "error");
-    }
-    return resp.data.data;
+    return await this.patchSingleMemo(memoId, payload);
   }
 
   private async postMemo(content: string, visibility: string): Promise<Memo> {
@@ -347,11 +343,33 @@ class MemosSync {
       visibility: `${visibility}`,
     };
     const resp: AxiosResponse<SingleMemo> = await axios.post(
-      this.openAPI(),
-      payload
+        this.openAPI(),
+        payload
     );
     if (resp.status !== 200) {
       throw "Connect issue";
+    }
+    return resp.data.data;
+  }
+
+  private async archiveMemo(
+      memoId: number
+  ): Promise<Memo> {
+    const payload = {
+      rowStatus: "ARCHIVED",
+    };
+    return await this.patchSingleMemo(memoId, payload);
+  }
+
+  private async patchSingleMemo(memoId: number, payload: Record<string, any>): Promise<Memo> {
+    const resp: AxiosResponse<SingleMemo> = await axios.patch(
+        `${this.openAPI(`/api/memo/${memoId}`)}`,
+        payload
+    );
+    if (resp.status !== 200) {
+      throw "Connect issue";
+    } else if (resp.status >= 400 || resp.status < 500) {
+      logseq.UI.showMsg(resp.data.message, "error");
     }
     return resp.data.data;
   }
