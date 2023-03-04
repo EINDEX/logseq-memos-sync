@@ -58,15 +58,31 @@ export default function settingSchema() {
       description: "Sync archive memos",
       default: false,
     },
+    {
+      key: "groupMemos",
+      type: "boolean",
+      title: "Group all memos or not",
+      description:
+          "Group all memos or each memo will be inserted directly into page block",
+      default: true,
+    },
+    {
+      key: "inboxName",
+      type: "string",
+      title: "Title in Page",
+      description:
+          "Messages will be pasted in daily journal into block with text, specified in inboxName property. Replace it in case of necessary.",
+      default: "#Memos",
+    },
     // {
     //   key: "",
     //   type: "heading",
     //   default: "",
     //   title: "Sync to Memos",
-    //   description: "send infomation to memos",
+    //   description: "send information to memos",
     // },
     // {
-    //   key: "sendVisiblity",
+    //   key: "sendVisibility",
     //   type: "enum",
     //   title: "Default Visibility for send block to memos",
     //   description:
