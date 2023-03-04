@@ -22,13 +22,14 @@ type ListMemo = {
 
 type SingleMemo = {
   data: Memo;
+  message: string;
 };
 
 const searchExistsMemo = async (
   memoId: number
 ): Promise<BlockEntity | null> => {
   const memo_blocks: BlockEntity[] | null = await logseq.DB.q(
-    `(property memoId ${memoId})`
+    `(property memoid ${memoId})`
   );
   if (memo_blocks && memo_blocks.length > 0) {
     return memo_blocks[0];
@@ -77,8 +78,8 @@ class MemosSync {
   private includeArchive: boolean | undefined;
   private autoSync: boolean | undefined;
   private backgroundSync: string | undefined;
-  private backgroundNotify: boolean | undefined;
   private timerId: NodeJS.Timer | undefined;
+  private sendVisiblity: string | undefined;
 
   constructor() {
     this.parseSetting();
@@ -90,12 +91,12 @@ class MemosSync {
   public async syncMemos(mode = "Manual") {
     try {
       await this.sync();
-      if (mode !== "Background" || this.backgroundNotify) {
+      if (mode !== "Background") {
         logseq.UI.showMsg("Moes Sync Success", "success");
       }
     } catch (e) {
       console.error(e);
-      if (mode !== "Background" || this.backgroundNotify) {
+      if (mode !== "Background") {
         logseq.UI.showMsg(String(e), "error");
       }
     }
@@ -131,8 +132,8 @@ class MemosSync {
     }
   }
 
-  private openAPI() {
-    const url = new URL(`${this.host}/api/memo`);
+  private openAPI(basePath = "/api/memo") {
+    const url = new URL(`${this.host}${basePath}`);
     url.searchParams.append("openId", String(this.openId));
     if (!this.includeArchive) {
       url.searchParams.append("rowStatus", "NORMAL");
@@ -150,7 +151,7 @@ class MemosSync {
         includeArchive,
         autoSync,
         backgroundSync,
-        backgroundNotify,
+        sendVisiblity,
       }: any = logseq.settings;
       const openAPIURL = new URL(openAPI);
       this.host = openAPIURL.origin;
@@ -164,7 +165,7 @@ class MemosSync {
       this.customPage = customPage;
       this.includeArchive = includeArchive;
       this.backgroundSync = backgroundSync;
-      this.backgroundNotify = backgroundNotify;
+      this.sendVisiblity = sendVisiblity.toUpperCase();
 
       this.backgroundConfigChange();
     } catch (e) {
@@ -173,10 +174,30 @@ class MemosSync {
     }
   }
 
-  public async publish(block: BlockEntity) {
-    const memo = await this.postMemo(block.content)
-    console.log(`${memo.id}`)
-    await logseq.Editor.upsertBlockProperty(block.uuid, "memoId", memo.id);
+  public async post(block: BlockEntity | null, visibility: string | null) {
+    if (block === null) {
+      console.error("block is not exits");
+      await logseq.UI.showMsg("block is not exits", "error");
+    }
+    const memoId = block?.properties?.memoid;
+    const memo =
+      memoId !== undefined
+        ? await this.updateMemos(
+            memoId,
+            block!.content,
+            visibility || this.sendVisiblity!
+          )
+        : await this.postMemo(
+            block!.content,
+            visibility || this.sendVisiblity!
+          );
+
+    await logseq.Editor.upsertBlockProperty(block!.uuid, "memoid", memo.id);
+    await logseq.Editor.upsertBlockProperty(
+      block!.uuid,
+      "memo-visibility",
+      memo.visibility
+    );
     await logseq.UI.showMsg("Post memo success");
   }
 
@@ -196,7 +217,8 @@ class MemosSync {
   ): Promise<BlockEntity | null> {
     const opts = {
       properties: {
-        memoId: memo.id,
+        memoid: memo.id,
+        "memo-visibility": memo.visibility,
       },
     };
     if (this.mode === "Custom Page") {
@@ -246,14 +268,44 @@ class MemosSync {
     return resp.data.data;
   }
 
-  private async postMemo(content: string, visibility = "PUBLIC"): Promise<Memo> {
+  private filterOutProperties(content: string) {
+    return content
+      .replaceAll(/\nmemoid::.*/gm, "")
+      .replaceAll(/\nmemo-visibility::.*/gm, "");
+  }
+
+  private async updateMemos(
+    memoId: number,
+    content: string,
+    visibility: string
+  ): Promise<Memo> {
     const payload = {
-      "content": `${content}`,
-      "visibility": `${visibility}`
-    }
-    const resp: AxiosResponse<SingleMemo> = await axios.post(this.openAPI(), payload);
+      id: `${memoId}`,
+      content: `${this.filterOutProperties(content)}`,
+      visibility: `${visibility}`,
+    };
+    const resp: AxiosResponse<SingleMemo> = await axios.patch(
+      `${this.openAPI(`/api/memo/${memoId}`)}`,
+      payload
+    );
     if (resp.status !== 200) {
-      logseq.Request;
+      throw "Connect issue";
+    } else if (resp.status >= 400 || resp.status < 500) {
+      logseq.UI.showMsg(resp.data.message, "error");
+    }
+    return resp.data.data;
+  }
+
+  private async postMemo(content: string, visibility: string): Promise<Memo> {
+    const payload = {
+      content: `${this.filterOutProperties(content)}`,
+      visibility: `${visibility}`,
+    };
+    const resp: AxiosResponse<SingleMemo> = await axios.post(
+      this.openAPI(),
+      payload
+    );
+    if (resp.status !== 200) {
       throw "Connect issue";
     }
     return resp.data.data;
