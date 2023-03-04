@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/EINDEX/logseq-memos-sync/compare/v1.2.0...v1.3.0) (2023-03-04)
+
+
+### Features
+
+* **sync:** add update memos ([bf13ec6](https://github.com/EINDEX/logseq-memos-sync/commit/bf13ec6f66239871dc4e81f8ff9fa95b59342a8b))
+
 # [1.2.0](https://github.com/EINDEX/logseq-memos-sync/compare/v1.1.0...v1.2.0) (2023-02-28)
 
 
