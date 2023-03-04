@@ -51,7 +51,7 @@ const memoContentGenerate = (
   return result
     .filter((item) => !!item.trim())
     .map((item) => {
-      return { content: item };
+      return { content: item, properties: {"memoid":memo.id,"memo-visibility": memo.visibility} };
     });
 };
 
@@ -79,10 +79,6 @@ class MemosSync {
   private autoSync: boolean | undefined;
   private backgroundSync: string | undefined;
   private backgroundNotify: boolean | undefined;
-  /**
-   * group memos in one block
-   * @private
-   */
   private groupMemos: boolean | undefined;
   private inboxName: string | undefined;
   private timerId: NodeJS.Timer | undefined;
