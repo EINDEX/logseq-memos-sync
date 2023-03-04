@@ -78,8 +78,15 @@ class MemosSync {
   private includeArchive: boolean | undefined;
   private autoSync: boolean | undefined;
   private backgroundSync: string | undefined;
+  private backgroundNotify: boolean | undefined;
+  /**
+   * group memos in one block
+   * @private
+   */
+  private groupMemos: boolean | undefined;
+  private inboxName: string | undefined;
   private timerId: NodeJS.Timer | undefined;
-  private sendVisiblity: string | undefined;
+  private sendVisibility: string | undefined;
 
   constructor() {
     this.parseSetting();
@@ -151,7 +158,10 @@ class MemosSync {
         includeArchive,
         autoSync,
         backgroundSync,
-        sendVisiblity,
+        backgroundNotify,
+        groupMemos,
+        inboxName,
+        sendVisibility,
       }: any = logseq.settings;
       const openAPIURL = new URL(openAPI);
       this.host = openAPIURL.origin;
@@ -165,7 +175,10 @@ class MemosSync {
       this.customPage = customPage;
       this.includeArchive = includeArchive;
       this.backgroundSync = backgroundSync;
-      this.sendVisiblity = sendVisiblity.toUpperCase();
+      this.backgroundNotify = backgroundNotify;
+      this.groupMemos = groupMemos;
+      this.inboxName = inboxName;
+      this.sendVisibility = sendVisibility.toUpperCase();
 
       this.backgroundConfigChange();
     } catch (e) {
@@ -185,11 +198,11 @@ class MemosSync {
         ? await this.updateMemos(
             memoId,
             block!.content,
-            visibility || this.sendVisiblity!
+            visibility || this.sendVisibility!
           )
         : await this.postMemo(
             block!.content,
-            visibility || this.sendVisiblity!
+            visibility || this.sendVisibility!
           );
 
     await logseq.Editor.upsertBlockProperty(block!.uuid, "memoid", memo.id);
@@ -222,6 +235,10 @@ class MemosSync {
       },
     };
     if (this.mode === "Custom Page") {
+      const groupBlock = await this.checkGroupBlock(String(this.customPage), String(this.inboxName));
+      if (groupBlock) {
+        return groupBlock;
+      }
       return await logseq.Editor.appendBlockInPage(
         String(this.customPage),
         renderMemoParentBlockContent(memo, preferredDateFormat, false),
@@ -229,9 +246,13 @@ class MemosSync {
       );
     } else if (this.mode === "Journal") {
       const journalPage = format(
-        new Date(memo.createdTs * 1000),
-        preferredDateFormat
+          new Date(memo.createdTs * 1000),
+          preferredDateFormat
       );
+      const groupBlock = await this.checkGroupBlock(journalPage, String(this.inboxName));
+      if (groupBlock) {
+        return groupBlock;
+      }
       return await logseq.Editor.appendBlockInPage(
         journalPage,
         renderMemoParentBlockContent(memo, preferredDateFormat, true),
@@ -239,6 +260,34 @@ class MemosSync {
       );
     } else {
       throw "Not Support this Mode";
+    }
+  }
+
+  private async checkGroupBlock(pageName: string, inboxName: string | null) : Promise<BlockEntity | null> {
+    console.log({ pageName, inboxName });
+    const pageBlocksTree = await logseq.Editor.getPageBlocksTree(pageName);
+
+    if (inboxName === null || inboxName === "null") {
+      console.log("No group");
+      return pageBlocksTree[0];
+    }
+
+    const inboxBlock = pageBlocksTree.find((block: { content: string }) => {
+      return block.content === inboxName;
+    });
+
+    if (!inboxBlock) {
+      const newInboxBlock = await logseq.Editor.insertBlock(
+          pageBlocksTree[pageBlocksTree.length - 1].uuid,
+          inboxName,
+          {
+            before: !pageBlocksTree[pageBlocksTree.length - 1].content,
+            sibling: true
+          }
+      );
+      return newInboxBlock;
+    } else {
+      return inboxBlock;
     }
   }
 
