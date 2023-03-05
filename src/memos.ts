@@ -46,6 +46,10 @@ const memoContentGenerate = (
     /^\* \[ \](.*)/gm,
     `${BREAK_LINE}${preferredTodo} $1 ${BREAK_LINE}`
   );
+  content = content.replaceAll(
+    /^\* \[x\](.*)/gm,
+    `${BREAK_LINE}DONE $1 ${BREAK_LINE}`
+  );
   const result = content.split(BREAK_LINE).filter((item) => !!item.trim());
   return result
     .filter((item) => !!item.trim())
@@ -326,10 +330,13 @@ class MemosSync {
     return resp.data.data;
   }
 
-  private filterOutProperties(content: string) {
+  private formatContentWhenPush(content: string) {
     return content
-      .replaceAll(/\nmemoid::.*/gm, "")
-      .replaceAll(/\nmemo-visibility::.*/gm, "");
+      .replaceAll(/^-?\S*?TODO /gm, "- [ ] ")
+      .replaceAll(/^-?\S*?NOW /gm, "- [ ] ")
+      .replaceAll(/^-?\S*?DONE /gm, "- [x] ")
+      .replaceAll(/^memoid::.*/gm, "")
+      .replaceAll(/^memo-visibility::.*/gm, "");
   }
 
   private async updateMemos(
@@ -339,7 +346,7 @@ class MemosSync {
   ): Promise<Memo> {
     const payload = {
       id: `${memoId}`,
-      content: `${this.filterOutProperties(content)}`,
+      content: `${this.formatContentWhenPush(content)}`,
       visibility: `${visibility}`,
     };
     return await this.patchSingleMemo(memoId, payload);
@@ -347,7 +354,7 @@ class MemosSync {
 
   private async postMemo(content: string, visibility: string): Promise<Memo> {
     const payload = {
-      content: `${this.filterOutProperties(content)}`,
+      content: `${this.formatContentWhenPush(content)}`,
       visibility: `${visibility}`,
     };
     const resp: AxiosResponse<SingleMemo> = await axios.post(
