@@ -4,6 +4,27 @@
 ### Bug Fixes
 
 * for release ([3ca72b6](https://github.com/EINDEX/logseq-memos-sync/commit/3ca72b6aebc8ff0e41fcdfb3547b7424e7920deb))
+* fuck the force push ([3a89619](https://github.com/EINDEX/logseq-memos-sync/commit/3a89619871fe0f6f4ba4e08c412ea620bdfb103e))
+* fuck the force push ([90464cc](https://github.com/EINDEX/logseq-memos-sync/commit/90464ccbea148ce004eda57b9e4eaa2e59884ad5))
+* fuck the force push ([40338c0](https://github.com/EINDEX/logseq-memos-sync/commit/40338c020228a92b7063dae5dd5e5b421b8cdbe8))
+* handle send memos content from logseq ([09f5231](https://github.com/EINDEX/logseq-memos-sync/commit/09f5231a5dc47a59622e1aefc46d77933e848ec1)), closes [#5](https://github.com/EINDEX/logseq-memos-sync/issues/5)
+* make stable of group sync ([ce5df1f](https://github.com/EINDEX/logseq-memos-sync/commit/ce5df1fac6ffb918233f3a572f4dee0f3106b6c4))
+* makeing a fix version ([a0914d8](https://github.com/EINDEX/logseq-memos-sync/commit/a0914d8c7cc1dc65d1138a73870d395ea85a1106))
+
+
+### Features
+
+* add publish memos from logseq ([473dad3](https://github.com/EINDEX/logseq-memos-sync/commit/473dad38906eb141c1be3228f19452b4ec108433))
+* add tag filter sync ([cb84cb6](https://github.com/EINDEX/logseq-memos-sync/commit/cb84cb690210b3f6e81188e9808a6f0675bd0639))
+* marge feat group message and archive after sync ([abd939f](https://github.com/EINDEX/logseq-memos-sync/commit/abd939f51c7a2d1af4f3cb4836174c2d6ad8683d))
+* **sync:** add update memos ([5ef425e](https://github.com/EINDEX/logseq-memos-sync/commit/5ef425e3a5f2db5822b671401e9226eee2c2323d))
+
+# [1.3.0](https://github.com/EINDEX/logseq-memos-sync/compare/v1.2.0...v1.3.0) (2023-03-05)
+
+
+### Bug Fixes
+
+* for release ([3ca72b6](https://github.com/EINDEX/logseq-memos-sync/commit/3ca72b6aebc8ff0e41fcdfb3547b7424e7920deb))
 * fuck the force push ([90464cc](https://github.com/EINDEX/logseq-memos-sync/commit/90464ccbea148ce004eda57b9e4eaa2e59884ad5))
 * fuck the force push ([40338c0](https://github.com/EINDEX/logseq-memos-sync/commit/40338c020228a92b7063dae5dd5e5b421b8cdbe8))
 * handle send memos content from logseq ([09f5231](https://github.com/EINDEX/logseq-memos-sync/commit/09f5231a5dc47a59622e1aefc46d77933e848ec1)), closes [#5](https://github.com/EINDEX/logseq-memos-sync/issues/5)
