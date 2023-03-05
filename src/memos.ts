@@ -50,7 +50,7 @@ const memoContentGenerate = (
   return result
     .filter((item) => !!item.trim())
     .map((item) => {
-      return { content: item, properties: {"memoid":memo.id,"memo-visibility": memo.visibility} };
+      return {content: item, properties: {"memoid": memo.id}};
     });
 };
 
@@ -113,6 +113,8 @@ class MemosSync {
 
   private timeSpentByConfig(word: string): number {
     switch (word) {
+      case "Minutely":
+        return 60 * 1000;
       case "Hourly":
         return 60 * 60 * 1000;
       case "Half-Hourly":
