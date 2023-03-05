@@ -39,7 +39,7 @@
 
 <p align="center">
     <a href="https://github.com/eindex/logseq-memos-sync/graphs/contributors">
-        <img src="https://contrib.rocks/image?repo=eindex/logseq-memos-sync&max=300&columns=14"/></a>
+        <img src="https://contrib.rocks/image?repo=eindex/logseq-memos-sync"/></a>
 </p>
 
 ## Star History
