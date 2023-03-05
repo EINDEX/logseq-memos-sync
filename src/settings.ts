@@ -46,9 +46,9 @@ export default function settingSchema() {
       type: "enum",
       title: "Background Sync",
       description:
-        "Sync Memos background, you can set this to `Half-Hourly` or `Hourly` or `Bi-Hourly`",
+          "Sync Memos background, you can set this to `Half-Hourly` or `Hourly` or `Bi-Hourly`",
       default: "Off",
-      enumChoices: ["Off", "Half-Hourly", "Hourly", "Bi-Hourly"],
+      enumChoices: ["Off", "Minutely", "Half-Hourly", "Hourly", "Bi-Hourly"],
       enumPicker: "select",
     },
     {
