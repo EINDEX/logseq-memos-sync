@@ -1,5 +1,7 @@
 import "@logseq/libs";
 
+
+
 export default function settingSchema() {
   logseq.useSettingsSchema([
     {
@@ -54,10 +56,18 @@ export default function settingSchema() {
     {
       key: "inboxName",
       type: "string",
-      title: "Title in Page",
+      title: "Memos Inbox Name",
       description:
         "Journal Grouped Only: Messages will be pasted in daily journal into block with text, specified in inboxName property. Replace it in case of necessary.",
       default: "#Memos",
+    },
+    {
+      key: "tagFilter",
+      type: "string",
+      title: "Choose memos tag to sync",
+      description:
+        "Only sync memos with this tag, leave it blank to sync all memos. You can use `|` to sync multiple tags, like `tag1|tag2` PS: without `#`",
+      default: "",
     },
     {
       key: "",

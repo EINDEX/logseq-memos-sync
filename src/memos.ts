@@ -40,7 +40,6 @@ const searchExistsMemo = async (
 const memoContentGenerate = (
   memo: Memo,
   preferredTodo: string,
-  groupMode: boolean
 ): IBatchBlock[] => {
   let content = memo.content;
   content = content.replaceAll(/^[-\*] /gm, "* ");
@@ -92,6 +91,7 @@ class MemosSync {
   private inboxName: string | undefined;
   private timerId: NodeJS.Timer | undefined;
   private sendVisibility: string | undefined;
+  private tagFilter: string | undefined;
 
   constructor() {
     this.parseSetting();
@@ -115,7 +115,7 @@ class MemosSync {
   }
 
   public async autoSyncWhenStartLogseq() {
-    await sleep(3000);
+    await sleep(2000);
     if (this.autoSync) {
       await this.syncMemos();
     }
@@ -169,6 +169,7 @@ class MemosSync {
         inboxName,
         archiveMemoAfterSync,
         sendVisibility,
+        tagFilter,
       }: any = logseq.settings;
       const openAPIURL = new URL(openAPI);
       this.host = openAPIURL.origin;
@@ -184,6 +185,7 @@ class MemosSync {
       this.backgroundSync = backgroundSync;
       this.archiveMemoAfterSync = archiveMemoAfterSync;
       this.inboxName = inboxName || "#Memos";
+      this.tagFilter = tagFilter || "";
 
       sendVisibility.forEach((visibility: string) => {
         console.log(visibility);
@@ -202,6 +204,15 @@ class MemosSync {
       console.error(e);
       logseq.UI.showMsg("Memos OpenAPI is not a URL", "error");
     }
+  }
+
+  private tagFilterList(): Array<string> {
+    if (this.tagFilter) {
+      return this.tagFilter!.split("|")
+        .map((item) => `#${item.trim()}`)
+        .filter((item) => item !== "#");
+    }
+    return [];
   }
 
   public async post(block: BlockEntity | null, visibility: string | null) {
@@ -235,6 +246,16 @@ class MemosSync {
   private async sync() {
     const memos = await this.fetchMemos();
     for (const memo of memos) {
+      let flag = false;
+      for (const tagFilter of this.tagFilterList()) {
+        if (memo.content.includes(tagFilter)) {
+          flag = true;
+          break;
+        }
+      }
+      if (this.tagFilterList().length !== 0 && !flag) {
+        return;
+      }
       const existMemo = await searchExistsMemo(memo.id);
       if (!existMemo) {
         await this.insertMemo(memo);
@@ -336,7 +357,7 @@ class MemosSync {
     }
     await logseq.Editor.insertBatchBlock(
       parentBlock.uuid,
-      memoContentGenerate(memo, preferredTodo, this.mode === "Journal Grouped"),
+      memoContentGenerate(memo, preferredTodo),
       { sibling: false }
     );
   }
