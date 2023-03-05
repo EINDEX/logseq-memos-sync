@@ -2,6 +2,7 @@ import "@logseq/libs";
 import { BlockEntity, IBatchBlock } from "@logseq/libs/dist/LSPlugin";
 import axios, { AxiosResponse } from "axios";
 import { format } from "date-fns";
+import { sleep } from "./utils";
 
 const BREAK_LINE = "!!!-!!!";
 
@@ -28,7 +29,7 @@ const searchExistsMemo = async (
   memoId: number
 ): Promise<BlockEntity | null> => {
   const memo_blocks: BlockEntity[] | null = await logseq.DB.q(
-    `(property memoid ${memoId})`
+    `(or (property memoid ${memoId}) (property memo-id ${memoId}))`
   );
   if (memo_blocks && memo_blocks.length > 0) {
     return memo_blocks[0];
@@ -38,7 +39,8 @@ const searchExistsMemo = async (
 
 const memoContentGenerate = (
   memo: Memo,
-  preferredTodo: string
+  preferredTodo: string,
+  groupMode: boolean
 ): IBatchBlock[] => {
   let content = memo.content;
   content = content.replaceAll(/^[-\*] /gm, "* ");
@@ -54,16 +56,21 @@ const memoContentGenerate = (
   return result
     .filter((item) => !!item.trim())
     .map((item) => {
-      return { content: item, properties: { memoid: memo.id } };
+      const data: IBatchBlock = { content: item };
+      return data;
     });
 };
 
 const renderMemoParentBlockContent = (
   memo: Memo,
   preferredDateFormat: string,
-  isJournal: boolean
+  isJournal: boolean,
+  isGrouped: boolean
 ) => {
   const createDate = new Date(memo.createdTs * 1000);
+  if (isGrouped) {
+    return `${format(createDate, "HH:mm")}`;
+  }
   if (isJournal) {
     return `${format(createDate, "HH:mm")} #memos`;
   }
@@ -97,7 +104,7 @@ class MemosSync {
     try {
       await this.sync();
       if (mode !== "Background") {
-        logseq.UI.showMsg("Moes Sync Success", "success");
+        logseq.UI.showMsg("Memos Sync Success", "success");
       }
     } catch (e) {
       console.error(e);
@@ -108,6 +115,7 @@ class MemosSync {
   }
 
   public async autoSyncWhenStartLogseq() {
+    await sleep(3000);
     if (this.autoSync) {
       await this.syncMemos();
     }
@@ -175,8 +183,19 @@ class MemosSync {
       this.includeArchive = includeArchive;
       this.backgroundSync = backgroundSync;
       this.archiveMemoAfterSync = archiveMemoAfterSync;
-      this.inboxName = inboxName;
-      this.sendVisibility = sendVisibility.toUpperCase();
+      this.inboxName = inboxName || "#Memos";
+
+      sendVisibility.forEach((visibility: string) => {
+        console.log(visibility);
+        logseq.Editor.registerSlashCommand(
+          `memos: Send in ${visibility}`,
+          async () => {
+            const entity: BlockEntity | null =
+              await logseq.Editor.getCurrentBlock();
+            await this.post(entity, visibility.toUpperCase());
+          }
+        );
+      });
 
       this.backgroundConfigChange();
     } catch (e) {
@@ -190,7 +209,8 @@ class MemosSync {
       console.error("block is not exits");
       await logseq.UI.showMsg("block is not exits", "error");
     }
-    const memoId = block?.properties?.memoid;
+    const memoId =
+      block?.properties?.get("memo-id") || block?.properties?.memoid;
     const memo =
       memoId !== undefined
         ? await this.updateMemos(
@@ -203,7 +223,7 @@ class MemosSync {
             visibility || this.sendVisibility!
           );
 
-    await logseq.Editor.upsertBlockProperty(block!.uuid, "memoid", memo.id);
+    await logseq.Editor.upsertBlockProperty(block!.uuid, "memo-id", memo.id);
     await logseq.Editor.upsertBlockProperty(
       block!.uuid,
       "memo-visibility",
@@ -231,14 +251,14 @@ class MemosSync {
   ): Promise<BlockEntity | null> {
     const opts = {
       properties: {
-        memoid: memo.id,
+        "memo-id": memo.id,
         "memo-visibility": memo.visibility,
       },
     };
     if (this.mode === "Custom Page") {
       return await logseq.Editor.appendBlockInPage(
         String(this.customPage),
-        renderMemoParentBlockContent(memo, preferredDateFormat, false),
+        renderMemoParentBlockContent(memo, preferredDateFormat, false, false),
         opts
       );
     } else if (this.mode === "Journal") {
@@ -248,7 +268,7 @@ class MemosSync {
       );
       return await logseq.Editor.appendBlockInPage(
         journalPage,
-        renderMemoParentBlockContent(memo, preferredDateFormat, true),
+        renderMemoParentBlockContent(memo, preferredDateFormat, true, false),
         opts
       );
     } else if (this.mode === "Journal Grouped") {
@@ -256,16 +276,13 @@ class MemosSync {
         new Date(memo.createdTs * 1000),
         preferredDateFormat
       );
-      const groupBlock = await this.checkGroupBlock(
+      const groupedBlock = await this.checkGroupBlock(
         journalPage,
         String(this.inboxName)
       );
-      if (groupBlock) {
-        return groupBlock;
-      }
       return await logseq.Editor.appendBlockInPage(
-        journalPage,
-        renderMemoParentBlockContent(memo, preferredDateFormat, true),
+        groupedBlock.uuid,
+        renderMemoParentBlockContent(memo, preferredDateFormat, true, true),
         opts
       );
     } else {
@@ -274,30 +291,33 @@ class MemosSync {
   }
 
   private async checkGroupBlock(
-    pageName: string,
-    inboxName: string | null
-  ): Promise<BlockEntity | null> {
-    console.debug({ pageName, inboxName });
-    const pageBlocksTree = await logseq.Editor.getPageBlocksTree(pageName);
-
-    if (inboxName === null || inboxName === "null") {
-      console.debug("No group");
-      return pageBlocksTree[0];
+    page: string,
+    inboxName: string
+  ): Promise<BlockEntity> {
+    console.info({ page, inboxName });
+    const pageEntity = await logseq.Editor.getPage(page, {
+      includeChildren: true,
+    });
+    if (!pageEntity) {
+      await logseq.Editor.createPage(page, {}, { journal: true });
     }
 
-    const inboxBlock = pageBlocksTree.find((block: { content: string }) => {
+    const blocks = await logseq.Editor.getPageBlocksTree(page);
+
+    const inboxBlock = blocks.find((block: { content: string }) => {
+      console.log(block);
       return block.content === inboxName;
     });
 
     if (!inboxBlock) {
-      const newInboxBlock = await logseq.Editor.insertBlock(
-        pageBlocksTree[pageBlocksTree.length - 1].uuid,
-        inboxName,
-        {
-          before: !pageBlocksTree[pageBlocksTree.length - 1].content,
-          sibling: true,
-        }
+      console.log(pageEntity);
+      const newInboxBlock = await logseq.Editor.appendBlockInPage(
+        page,
+        inboxName
       );
+      if (!newInboxBlock) {
+        throw "Memos: Cannot create new inbox block";
+      }
       return newInboxBlock;
     } else {
       return inboxBlock;
@@ -316,7 +336,7 @@ class MemosSync {
     }
     await logseq.Editor.insertBatchBlock(
       parentBlock.uuid,
-      memoContentGenerate(memo, preferredTodo),
+      memoContentGenerate(memo, preferredTodo, this.mode === "Journal Grouped"),
       { sibling: false }
     );
   }
@@ -335,6 +355,7 @@ class MemosSync {
       .replaceAll(/^-?\S*?TODO /gm, "- [ ] ")
       .replaceAll(/^-?\S*?NOW /gm, "- [ ] ")
       .replaceAll(/^-?\S*?DONE /gm, "- [x] ")
+      .replaceAll(/^memo-id::.*/gm, "")
       .replaceAll(/^memoid::.*/gm, "")
       .replaceAll(/^memo-visibility::.*/gm, "");
   }

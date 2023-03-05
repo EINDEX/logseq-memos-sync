@@ -31,7 +31,7 @@ export default function settingSchema() {
       description: "Mode to Sync Memos",
       default: "Journal Grouped",
       enumChoices: ["Custom Page", "Journal", "Journal Grouped"],
-      enumPicker: "select",
+      enumPicker: "radio",
     },
     {
       key: "customPage",
@@ -46,24 +46,17 @@ export default function settingSchema() {
       type: "enum",
       title: "Background Sync",
       description:
-          "Sync Memos background, you can set this to `Half-Hourly` or `Hourly` or `Bi-Hourly`, If you want to sync memos very frequently, you can set this to `Minutely`",
-      default: "Off",
-      enumChoices: ["Off", "Minutely", "Half-Hourly", "Hourly", "Bi-Hourly"],
-      enumPicker: "select",
-    },
-    {
-      key: "includeArchive",
-      type: "boolean",
-      title: "Include archive",
-      description: "Sync archive memos to Logseq",
-      default: false,
+        "Sync Memos background, you can set this to `Half-Hourly` or `Hourly` or `Bi-Hourly`, If you want to sync memos very frequently, you can set this to `Minutely`",
+      default: "Hourly",
+      enumChoices: ["Off", "Half-Hourly", "Hourly", "Bi-Hourly", "Minutely"],
+      enumPicker: "radio",
     },
     {
       key: "inboxName",
       type: "string",
       title: "Title in Page",
       description:
-          "Journal Grouped Only: Messages will be pasted in daily journal into block with text, specified in inboxName property. Replace it in case of necessary.",
+        "Journal Grouped Only: Messages will be pasted in daily journal into block with text, specified in inboxName property. Replace it in case of necessary.",
       default: "#Memos",
     },
     {
@@ -78,25 +71,33 @@ export default function settingSchema() {
       type: "enum",
       title: "Default Visibility for send block to memos",
       description:
-          "Sending block back to memos, what is the default visibility? If you enable it, you will just see one send button in the slash menu",
-      default: "Private",
-      enumChoices: ["Off", "Public", "Protected", "Private"],
-      enumPicker: "select",
+        "Sending block back to memos, what is the visibility you want to used? PS: reopen logseq to update commands.",
+      default: [],
+      enumChoices: ["Public", "Protected", "Private"],
+      enumPicker: "checkbox",
     },
     {
       key: "",
       type: "heading",
       default: "",
       title: "Advanced",
-      description: "The features in this area have huge impact on your data, use it only when you know what are you doing",
+      description:
+        "The features in this area have huge impact on your data, use it only when you know what are you doing",
     },
     {
       key: "archiveMemoAfterSync",
       type: "boolean",
       title: "Archive memo after sync",
       description:
-          "If this option is on, memos will be archived after sync to Logseq.",
+        "If this option is on, memos will be archived after sync to Logseq.",
       default: "false",
+    },
+    {
+      key: "includeArchive",
+      type: "boolean",
+      title: "Include archive",
+      description: "Sync archive memos to Logseq",
+      default: false,
     },
   ]);
 }

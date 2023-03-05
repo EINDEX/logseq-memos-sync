@@ -22,3 +22,12 @@ const subscribeToUIVisible = (onChange: () => void) =>
 export const useAppVisible = () => {
   return React.useSyncExternalStore(subscribeToUIVisible, () => _visible);
 };
+
+
+export const sleep = (waitSec: number) : Promise<void> => {
+  return new Promise(function (resolve) {
+
+      setTimeout(function() { resolve() }, waitSec);
+
+  });
+} 
