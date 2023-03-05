@@ -1,7 +1,7 @@
 import "@logseq/libs";
 
 import { BlockEntity, IHookEvent } from "@logseq/libs/dist/LSPlugin";
-import settingSchema from "./settings";
+import settingSchema, { Visibility } from "./settings";
 import MemosSync from "./memos";
 
 function main() {
@@ -21,6 +21,19 @@ function main() {
   logseq.onSettingsChanged((e: IHookEvent) => {
     console.log(e);
     memosSync.parseSetting();
+  });
+
+  const { sendVisibility }: any = logseq.settings;
+  sendVisibility.forEach((visibility: Visibility) => {
+    console.log(visibility);
+    logseq.Editor.registerSlashCommand(
+      `memos: Send in ${visibility}`,
+      async () => {
+        const entity: BlockEntity | null =
+          await logseq.Editor.getCurrentBlock();
+        await memosSync.post(entity, visibility);
+      }
+    );
   });
 
   memosSync.autoSyncWhenStartLogseq();

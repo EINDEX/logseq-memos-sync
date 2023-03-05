@@ -1,5 +1,24 @@
 import "@logseq/libs";
 
+export enum Mode {
+  CustomPage = "Custom Page",
+  Journal = "Journal",
+  JournalGrouped = "Journal Grouped",
+}
+
+export enum BackgroundSync {
+  Off = "Off",
+  HalfHourly = "Half-Hourly",
+  Hourly = "Hourly",
+  BiHourly = "Bi-Hourly",
+  Minutely = "Minutely",
+}
+
+export enum Visibility {
+  Public = "Public",
+  Protected = "Protected",
+  Private = "Private",
+}
 
 
 export default function settingSchema() {
@@ -32,7 +51,7 @@ export default function settingSchema() {
       title: "Mode",
       description: "Mode to Sync Memos",
       default: "Journal Grouped",
-      enumChoices: ["Custom Page", "Journal", "Journal Grouped"],
+      enumChoices: Object.values(Mode),
       enumPicker: "radio",
     },
     {
@@ -50,7 +69,7 @@ export default function settingSchema() {
       description:
         "Sync Memos background, you can set this to `Half-Hourly` or `Hourly` or `Bi-Hourly`, If you want to sync memos very frequently, you can set this to `Minutely`",
       default: "Hourly",
-      enumChoices: ["Off", "Half-Hourly", "Hourly", "Bi-Hourly", "Minutely"],
+      enumChoices: Object.values(BackgroundSync),
       enumPicker: "radio",
     },
     {
@@ -81,9 +100,9 @@ export default function settingSchema() {
       type: "enum",
       title: "Default Visibility for send block to memos",
       description:
-        "Sending block back to memos, what is the visibility you want to used? PS: reopen logseq to update commands.",
+        "Sending block back to memos, what is the visibility you want to used? PS: reopen logseq to apply this change.",
       default: [],
-      enumChoices: ["Public", "Protected", "Private"],
+      enumChoices: Object.values(Visibility),
       enumPicker: "checkbox",
     },
     {
