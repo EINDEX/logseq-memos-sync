@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/EINDEX/logseq-memos-sync/compare/v1.3.0...v1.3.1) (2023-03-05)
+
+
+### Bug Fixes
+
+* release a fix version ([eaf6b3d](https://github.com/EINDEX/logseq-memos-sync/commit/eaf6b3d687182bbc0a0f889a32d2b220d8933874))
+
 # [1.3.0](https://github.com/EINDEX/logseq-memos-sync/compare/v1.2.0...v1.3.0) (2023-03-05)
 
 
