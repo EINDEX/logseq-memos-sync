@@ -8,6 +8,8 @@
 
 - Sync memos to logseq via memos openAPI
 - Auto Sync memos when start Logseq
+- Can send block to Memos now!
+- Allow sync memos with tags.
 
 ## How to use
 
@@ -18,9 +20,10 @@
 
 ## Limit
 
-- now just can first 1000 memos.
-- if memo exist, cannot update the content.
-- can not sync content from logseq to memos.
+- Only sync last 1000 memos.
+- if memo exist, cannot update the content. We don't want to break your content.
+- Cannot sync content from logseq to memos.
+- Cannot send image and files to Memos.
 
 ## ScreenShot
 
@@ -31,6 +34,13 @@
 ## Thanks
 
 - [Memos](https://github.com/usememos/memos)
+
+## Contributors
+
+<p align="center">
+    <a href="https://github.com/eindex/logseq-memos-sync/graphs/contributors">
+        <img src="https://contrib.rocks/image?repo=eindex/logseq-memos-sync&max=300&columns=14"/></a>
+</p>
 
 ## Star History
 
