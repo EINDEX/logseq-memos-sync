@@ -18,8 +18,8 @@ function main() {
       memosSync.syncMemos();
     }
   );
+
   logseq.onSettingsChanged((e: IHookEvent) => {
-    console.log(e);
     memosSync.parseSetting();
   });
 

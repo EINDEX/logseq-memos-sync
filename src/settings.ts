@@ -20,7 +20,6 @@ export enum Visibility {
   Private = "Private",
 }
 
-
 export default function settingSchema() {
   logseq.useSettingsSchema([
     {
@@ -127,6 +126,14 @@ export default function settingSchema() {
       title: "Include archive",
       description: "Sync archive memos to Logseq",
       default: false,
+    },
+    {
+      key: "fullSync",
+      type: "string",
+      title: "Full Sync",
+      description:
+        "Input `Agree`, to make a full sync for next time sync.(this not override your data)",
+      default: "",
     },
   ]);
 }

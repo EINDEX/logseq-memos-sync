@@ -1,6 +1,7 @@
 import "@logseq/libs";
 import { BlockEntity } from "@logseq/libs/dist/LSPlugin";
 import { format } from "date-fns";
+import { BATCH_SIZE } from "./constants";
 import MemosClient from "./memos/client";
 import { Memo } from "./memos/type";
 import {
@@ -28,6 +29,7 @@ class MemosSync {
   private inboxName: string | undefined;
   private timerId: NodeJS.Timer | undefined;
   private tagFilterList: Array<string> | undefined;
+  private flat: boolean | undefined;
 
   constructor() {
     this.parseSetting();
@@ -50,17 +52,59 @@ class MemosSync {
     }
   }
 
+  private lastSyncId(): number {
+    return logseq.settings!.lastSyncId || -1;
+  }
+
+  private saveSyncId(memoId: number) {
+    logseq.updateSettings({ lastSyncId: memoId });
+  }
+
+  private beforeSync() {
+    if (logseq.settings?.fullSync === "Agree") {
+      this.saveSyncId(-1);
+      logseq.updateSettings({ fullSync: "" });
+    }
+  }
+
   private async sync() {
-    const memos = await this.memosClient!.getMemos(this.includeArchive!);
-    for (const memo of this.memosFitler(memos)) {
-      const existMemo = await searchExistsMemo(memo.id);
-      if (!existMemo) {
-        await this.insertMemo(memo);
-        if (this.archiveMemoAfterSync && memo.visibility === Visibility.Private) {
-          await this.archiveMemo(memo.id);
+    this.beforeSync();
+    let maxMemoId = this.lastSyncId();
+    let newMaxMemoId = maxMemoId;
+    let end = false;
+    let cousor = 0;
+    while (!end) {
+      const memos = await this.memosClient!.getMemos(
+        this.includeArchive!,
+        BATCH_SIZE,
+        cousor
+      );
+      for (const memo of this.memosFitler(memos)) {
+        if (memo.id <= maxMemoId) {
+          end = true;
+          break;
+        }
+        if (memo.id > newMaxMemoId) {
+          newMaxMemoId = memo.id;
+        }
+        const existMemo = await searchExistsMemo(memo.id);
+        if (!existMemo) {
+          await this.insertMemo(memo);
+          if (
+            this.archiveMemoAfterSync &&
+            memo.visibility === Visibility.Private
+          ) {
+            await this.archiveMemo(memo.id);
+          }
         }
       }
+      if (memos.length < BATCH_SIZE) {
+        end = true;
+        break;
+      }
+      cousor += BATCH_SIZE;
     }
+    this.saveSyncId(newMaxMemoId);
   }
 
   public async autoSyncWhenStartLogseq() {
@@ -93,6 +137,7 @@ class MemosSync {
         inboxName,
         archiveMemoAfterSync,
         tagFilter,
+        flat,
       }: any = logseq.settings;
       this.memosClient = new MemosClient(openAPI);
       this.mode = mode;
@@ -103,6 +148,7 @@ class MemosSync {
       this.archiveMemoAfterSync = archiveMemoAfterSync;
       this.inboxName = inboxName || "#Memos";
       this.tagFilterList = tagFilterList(tagFilter);
+      this.flat = flat;
 
       this.backgroundConfigChange();
     } catch (e) {

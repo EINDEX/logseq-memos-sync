@@ -15,13 +15,18 @@ export default class MemosClient {
     this.openId = openId;
   }
 
-  public async getMemos(includeArchive: boolean): Promise<Array<Memo>> {
+  public async getMemos(
+    includeArchive: boolean,
+    limit: number,
+    offset: number
+  ): Promise<Array<Memo>> {
     const url = new URL(`${this.host}/api/memo`);
     url.searchParams.append("openId", String(this.openId));
     if (!includeArchive) {
       url.searchParams.append("rowStatus", "NORMAL");
     }
-    url.searchParams.append("limit", "1000");
+    url.searchParams.append("limit", limit.toString());
+    url.searchParams.append("offset", offset.toString());
     const resp: AxiosResponse<ListMemo> = await axios.get(url.toString());
     if (resp.status !== 200) {
       throw "Connect issue";
