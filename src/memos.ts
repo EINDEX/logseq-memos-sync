@@ -165,7 +165,6 @@ class MemosSync {
     const opts = {
       properties: {
         "memo-id": memo.id,
-        "memo-visibility": memo.visibility,
       },
     };
     if (this.mode === Mode.CustomPage) {
