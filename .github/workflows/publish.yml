@@ -7,7 +7,8 @@ name: Releases
 on:
   push:
     branches:
-      - "master" # Push events to matching any tag format, i.e. 1.0, 20.15.10
+      - "master"
+      - "release"
   workflow_dispatch:
     
 
@@ -35,6 +36,7 @@ jobs:
       - name: Install zip
         uses: montudor/action-zip@v1
       - name: Release
+        if: github.head_ref == 'release'
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
