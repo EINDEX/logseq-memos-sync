@@ -56,7 +56,7 @@ class MemosSync {
       const existMemo = await searchExistsMemo(memo.id);
       if (!existMemo) {
         await this.insertMemo(memo);
-        if (this.archiveMemoAfterSync) {
+        if (this.archiveMemoAfterSync && memo.visibility === Visibility.Private) {
           await this.archiveMemo(memo.id);
         }
       }

@@ -118,7 +118,7 @@ export default function settingSchema() {
       type: "boolean",
       title: "Archive memo after sync",
       description:
-        "If this option is on, memos will be archived after sync to Logseq.",
+        "If this option is on, private memos will be archived after sync to Logseq.",
       default: "false",
     },
     {
