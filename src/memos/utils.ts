@@ -18,7 +18,8 @@ export const formatContentWhenPush = (content: string) => {
 
 export const memoContentGenerate = (
   memo: Memo,
-  preferredTodo: string
+  preferredTodo: string,
+  withProperties: boolean = false
 ): IBatchBlock[] => {
   let content = memo.content;
   content = content.replaceAll(/^[-*] /gm, "* ");
@@ -35,6 +36,11 @@ export const memoContentGenerate = (
     .filter((item) => !!item.trim())
     .map((item) => {
       const data: IBatchBlock = { content: item };
+      if (withProperties) {
+        data.properties = {
+          "memo-id": memo.id,
+        };
+      }
       return data;
     });
 };

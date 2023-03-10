@@ -135,5 +135,12 @@ export default function settingSchema() {
         "Input `Agree`, to make a full sync for next time sync.(this not override your data)",
       default: "",
     },
+    {
+      key: "flat",
+      type: "boolean",
+      title: "Flat Result",
+      description: "Flat all your result.",
+      default: false,
+    },
   ]);
 }

@@ -59,18 +59,18 @@ class MemosSync {
   }
 
   private async saveSyncId(memoId: number) {
-    await saveSyncStatus(memoId)
+    await saveSyncStatus(memoId);
   }
 
   private async beforeSync() {
     if (logseq.settings?.fullSync === "Agree") {
       logseq.updateSettings({ fullSync: "" });
-      await saveSyncStatus(-1)
+      await saveSyncStatus(-1);
     }
   }
 
   private async sync() {
-    this.beforeSync();
+    await this.beforeSync();
 
     let maxMemoId = await this.lastSyncId();
     let newMaxMemoId = maxMemoId;
@@ -145,7 +145,7 @@ class MemosSync {
       this.memosClient = new MemosClient(openAPI);
       this.mode = mode;
       this.autoSync = autoSync;
-      this.customPage = customPage;
+      this.customPage = customPage || "Memos";
       this.includeArchive = includeArchive;
       this.backgroundSync = backgroundSync;
       this.archiveMemoAfterSync = archiveMemoAfterSync;
@@ -207,16 +207,25 @@ class MemosSync {
     });
   }
 
+  private async ensurePage(page: string, isJournal: boolean = false) {
+    const pageEntity = await logseq.Editor.getPage(page);
+    if (!pageEntity) {
+      return await logseq.Editor.createPage(page, {}, { journal: isJournal });
+    }
+    return pageEntity;
+  }
+
   private async generateParentBlock(
     memo: Memo,
     preferredDateFormat: string
-  ): Promise<BlockEntity | null> {
+  ): Promise<BlockEntity | PageEntity | null> {
     const opts = {
       properties: {
         "memo-id": memo.id,
       },
     };
     if (this.mode === Mode.CustomPage) {
+      if (this.flat) return await this.ensurePage(this.customPage!);
       return await logseq.Editor.appendBlockInPage(
         String(this.customPage),
         renderMemoParentBlockContent(memo, preferredDateFormat, this.mode),
@@ -227,6 +236,7 @@ class MemosSync {
         new Date(memo.createdTs * 1000),
         preferredDateFormat
       );
+      if (this.flat) return await this.ensurePage(journalPage, true);
       return await logseq.Editor.appendBlockInPage(
         journalPage,
         renderMemoParentBlockContent(memo, preferredDateFormat, this.mode),
@@ -237,10 +247,12 @@ class MemosSync {
         new Date(memo.createdTs * 1000),
         preferredDateFormat
       );
+      await this.ensurePage(journalPage, true);
       const groupedBlock = await this.checkGroupBlock(
         journalPage,
         String(this.inboxName)
       );
+      if (this.flat) return groupedBlock;
       return await logseq.Editor.appendBlockInPage(
         groupedBlock.uuid,
         renderMemoParentBlockContent(memo, preferredDateFormat, this.mode),
@@ -254,14 +266,7 @@ class MemosSync {
   private async checkGroupBlock(
     page: string,
     inboxName: string
-  ): Promise<BlockEntity> {
-    const pageEntity = await logseq.Editor.getPage(page, {
-      includeChildren: true,
-    });
-    if (!pageEntity) {
-      await logseq.Editor.createPage(page, {}, { journal: true });
-    }
-
+  ): Promise<BlockEntity | PageEntity> {
     const blocks = await logseq.Editor.getPageBlocksTree(page);
 
     const inboxBlock = blocks.find((block: { content: string }) => {
@@ -295,7 +300,11 @@ class MemosSync {
     }
     await logseq.Editor.insertBatchBlock(
       parentBlock.uuid,
-      memoContentGenerate(memo, preferredTodo),
+      memoContentGenerate(
+        memo,
+        preferredTodo,
+        !this.archiveMemoAfterSync && this.flat
+      ),
       { sibling: false }
     );
   }
