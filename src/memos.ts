@@ -303,7 +303,7 @@ class MemosSync {
       memoContentGenerate(
         memo,
         preferredTodo,
-        !this.archiveMemoAfterSync && this.flat
+        !this.archiveMemoAfterSync && this.flat && memo.visibility === Visibility.Private
       ),
       { sibling: false }
     );
