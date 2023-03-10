@@ -26,6 +26,7 @@ module.exports = {
       "@semantic-release/github",
       {
         assets: "logseq-memos-sync-*.zip",
+        branches: ["release"]
       },
     ],
   ],
