@@ -57,3 +57,22 @@ export const getMemoId = (properties: Record<string, any>): number | null => {
   }
   return null;
 };
+
+export const saveSyncStatus = async (lastSyncId: number) => {
+  const s = logseq.Assets.makeSandboxStorage();
+  await s.setItem(
+    "syncStatus.json",
+    JSON.stringify({ lastSyncId: lastSyncId })
+  );
+};
+
+export const fetchSyncStatus = async (
+): Promise<{ lastSyncId: number }> => {
+  const s = logseq.Assets.makeSandboxStorage();
+  try {
+    const syncStatusString = await s.getItem("syncStatus.json");
+    return JSON.parse(syncStatusString!);
+  } catch (error) {    
+      return {lastSyncId : 0};
+  }
+};

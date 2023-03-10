@@ -1,5 +1,5 @@
 import "@logseq/libs";
-import { BlockEntity } from "@logseq/libs/dist/LSPlugin";
+import { BlockEntity, PageEntity } from "@logseq/libs/dist/LSPlugin";
 import { format } from "date-fns";
 import { BATCH_SIZE } from "./constants";
 import MemosClient from "./memos/client";
@@ -16,6 +16,8 @@ import {
   timeSpentByConfig,
   searchExistsMemo,
   getMemoId,
+  fetchSyncStatus,
+  saveSyncStatus,
 } from "./utils";
 
 class MemosSync {
@@ -52,24 +54,25 @@ class MemosSync {
     }
   }
 
-  private lastSyncId(): number {
-    return logseq.settings!.lastSyncId || -1;
+  private async lastSyncId(): Promise<number> {
+    return (await fetchSyncStatus()).lastSyncId;
   }
 
-  private saveSyncId(memoId: number) {
-    logseq.updateSettings({ lastSyncId: memoId });
+  private async saveSyncId(memoId: number) {
+    await saveSyncStatus(memoId)
   }
 
-  private beforeSync() {
+  private async beforeSync() {
     if (logseq.settings?.fullSync === "Agree") {
-      this.saveSyncId(-1);
       logseq.updateSettings({ fullSync: "" });
+      await saveSyncStatus(-1)
     }
   }
 
   private async sync() {
     this.beforeSync();
-    let maxMemoId = this.lastSyncId();
+
+    let maxMemoId = await this.lastSyncId();
     let newMaxMemoId = maxMemoId;
     let end = false;
     let cousor = 0;
