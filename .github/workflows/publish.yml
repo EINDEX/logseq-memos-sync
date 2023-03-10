@@ -7,7 +7,7 @@ name: Releases
 on:
   push:
     branches:
-      - "master"
+      - "main"
       - "release"
   workflow_dispatch:
     
@@ -36,7 +36,7 @@ jobs:
       - name: Install zip
         uses: montudor/action-zip@v1
       - name: Release
-        if: github.head_ref == 'release'
+        if: github.ref_name == 'release'
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
