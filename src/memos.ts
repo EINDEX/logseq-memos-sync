@@ -95,7 +95,7 @@ class MemosSync {
           await this.insertMemo(memo);
           if (
             this.archiveMemoAfterSync &&
-            memo.visibility === Visibility.Private
+            memo.visibility.toLowerCase() === Visibility.Private.toLowerCase()
           ) {
             await this.archiveMemo(memo.id);
           }
@@ -303,7 +303,9 @@ class MemosSync {
       memoContentGenerate(
         memo,
         preferredTodo,
-        !this.archiveMemoAfterSync && this.flat && memo.visibility === Visibility.Private
+        !this.archiveMemoAfterSync &&
+          this.flat &&
+          memo.visibility.toLowerCase() === Visibility.Private.toLowerCase()
       ),
       { sibling: false }
     );
