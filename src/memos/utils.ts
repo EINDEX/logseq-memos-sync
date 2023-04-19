@@ -1,4 +1,4 @@
-import { BlockEntity, IBatchBlock } from "@logseq/libs/dist/LSPlugin";
+import { IBatchBlock } from "@logseq/libs/dist/LSPlugin";
 import { Mode } from "../settings";
 import { Memo } from "./type";
 import { format } from "date-fns";
@@ -35,7 +35,7 @@ export const memoContentGenerate = (
   return result
     .filter((item) => !!item.trim())
     .map((item) => {
-      const data: IBatchBlock = { content: item };
+      const data: IBatchBlock = { content: item, properties: {} };
       if (withProperties) {
         data.properties = {
           "memo-id": memo.id,
