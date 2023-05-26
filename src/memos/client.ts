@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { ListMemo, Memo, SingleMemo } from "./type";
+import { ListMemo, Memo } from "./type";
 
 export default class MemosClient {
   private openId: string;
@@ -15,11 +15,26 @@ export default class MemosClient {
     this.openId = openId;
   }
 
+
+  private async request<T>(url: string, method: string, payload: any): Promise<T> {
+    const resp: AxiosResponse<T> = await axios({
+      method: method,
+      url: url,
+      data: payload,
+    });
+    if (resp.status !== 200) {
+      throw "Connect issue";
+    } else if (resp.status >= 400 && resp.status < 500) {
+      throw resp.data?.message || "Error occurred";
+    }
+    return resp.data.data;
+  }
+
   public async getMemos(
     includeArchive: boolean,
     limit: number,
     offset: number
-  ): Promise<Array<Memo>> {
+  ): Promise<ListMemo> {
     const url = new URL(`${this.host}/api/memo`);
     url.searchParams.append("openId", String(this.openId));
     if (!includeArchive) {
@@ -27,11 +42,11 @@ export default class MemosClient {
     }
     url.searchParams.append("limit", limit.toString());
     url.searchParams.append("offset", offset.toString());
-    const resp: AxiosResponse<ListMemo> = await axios.get(url.toString());
-    if (resp.status !== 200) {
-      throw "Connect issue";
+    try {
+      return await this.request<ListMemo>(url.toString(), "GET", {});
+    } catch (error) {
+      throw new Error(`Failed to get memos, ${error}`);
     }
-    return resp.data.data;
   }
 
   public async updateMemo(
@@ -40,16 +55,11 @@ export default class MemosClient {
   ): Promise<Memo> {
     const url = new URL(`${this.host}/api/memo/${memoId}`);
     url.searchParams.append("openId", String(this.openId));
-    const resp: AxiosResponse<SingleMemo> = await axios.patch(
-      url.toString(),
-      payload
-    );
-    if (resp.status !== 200) {
-      throw "Connect issue";
-    } else if (resp.status >= 400 && resp.status < 500) {
-      throw resp.data.message;
+    try {
+      return await this.request<Memo>(url.toString(), "PATCH", payload);
+    } catch (error) {
+      throw new Error(`Failed to update memo, ${error}.`);
     }
-    return resp.data.data;
   }
 
   public async createMemo(content: string, visibility: string): Promise<Memo> {
@@ -59,15 +69,10 @@ export default class MemosClient {
     };
     const url = new URL(`${this.host}/api/memo`);
     url.searchParams.append("openId", String(this.openId));
-    const resp: AxiosResponse<SingleMemo> = await axios.post(
-      url.toString(),
-      payload
-    );
-    if (resp.status !== 200) {
-      throw "Connect issue";
-    } else if (resp.status >= 400 && resp.status < 500) {
-      throw resp.data.message;
+    try {
+      return await this.request<Memo>(url.toString(), "POST", payload);
+    } catch (error) {
+      throw new Error(`Failed to create memo, ${error}.`);
     }
-    return resp.data.data;
   }
 }
