@@ -1,6 +1,12 @@
 import axios, { AxiosResponse } from "axios";
 import { ListMemo, Memo } from "./type";
 
+type MemosAPIResponse<T> = {
+  data:T;
+  message: string;
+};
+
+
 export default class MemosClient {
   private openId: string;
   private host: string;
@@ -17,7 +23,7 @@ export default class MemosClient {
 
 
   private async request<T>(url: string, method: string, payload: any): Promise<T> {
-    const resp: AxiosResponse<T> = await axios({
+    const resp: AxiosResponse<MemosAPIResponse<T>> = await axios({
       method: method,
       url: url,
       data: payload,
@@ -27,14 +33,15 @@ export default class MemosClient {
     } else if (resp.status >= 400 && resp.status < 500) {
       throw resp.data?.message || "Error occurred";
     }
-    return resp.data.data;
+    const data = resp.data.data;
+    return data;  
   }
 
   public async getMemos(
     includeArchive: boolean,
     limit: number,
     offset: number
-  ): Promise<ListMemo> {
+  ): Promise<Memo[]> {
     const url = new URL(`${this.host}/api/memo`);
     url.searchParams.append("openId", String(this.openId));
     if (!includeArchive) {
@@ -43,7 +50,7 @@ export default class MemosClient {
     url.searchParams.append("limit", limit.toString());
     url.searchParams.append("offset", offset.toString());
     try {
-      return await this.request<ListMemo>(url.toString(), "GET", {});
+      return await this.request<Memo[]>(url.toString(), "GET", {});
     } catch (error) {
       throw new Error(`Failed to get memos, ${error}`);
     }
