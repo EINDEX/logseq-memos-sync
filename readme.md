@@ -13,17 +13,21 @@
 
 ## How to use
 
-1. Open plugin setting, setting up openAPI
-2. Open command panel
-3. Search for Sync Memos
-4. Run it
+1. Open plugin setting, setting up Memos openAPI
+
+### Manually Sync
+1. Open Logseq command panel, Win `Ctrl + Shift + P` or macOS `Command + Shift + P`.
+2. Search for Sync Memos
+3. Run it
+
+### Automatic Sync
+1. Open plugin setting and checked `autoSync` field.
 
 ## Limit
 
 - Only sync last 1000 memos.
 - if memo exist, cannot update the content. We don't want to break your content.
-- Cannot sync content from logseq to memos.
-- Cannot send image and files to Memos.
+- Only can fetch/send text content(markdown part).
 
 ## ScreenShot
 
