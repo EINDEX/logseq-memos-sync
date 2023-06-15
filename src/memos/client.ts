@@ -23,18 +23,23 @@ export default class MemosClient {
 
 
   private async request<T>(url: string, method: string, payload: any): Promise<T> {
-    const resp: AxiosResponse<MemosAPIResponse<T>> = await axios({
-      method: method,
-      url: url,
-      data: payload,
-    });
-    if (resp.status !== 200) {
-      throw "Connect issue";
-    } else if (resp.status >= 400 && resp.status < 500) {
-      throw resp.data?.message || "Error occurred";
+    try {
+      const resp: AxiosResponse<MemosAPIResponse<T>> = await axios({
+        method: method,
+        url: url,
+        data: payload,
+      });
+      if (resp.status !== 200) {
+        throw "Something wrong!";
+      } else if (resp.status >= 400 && resp.status < 500) {
+        throw resp.data?.message || "Error occurred";
+      }
+      const data = resp.data.data;
+      return data;  
+    } catch ( error) {
+      throw "Cannot connect to memos server";
     }
-    const data = resp.data.data;
-    return data;  
+  
   }
 
   public async getMemos(
