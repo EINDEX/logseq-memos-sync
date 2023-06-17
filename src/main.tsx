@@ -5,7 +5,7 @@ import settingSchema, { Visibility } from "./settings";
 import MemosSync from "./memos";
 
 function main() {
-  console.log("Logseq Memos Plugin Loading!");
+  console.info("memos-sync: Logseq Memos Plugin Loading!");
 
   settingSchema();
 
@@ -25,7 +25,6 @@ function main() {
 
   const { sendVisibility }: any = logseq.settings;
   sendVisibility.forEach((visibility: Visibility) => {
-    console.log(visibility);
     logseq.Editor.registerSlashCommand(
       `memos: Send in ${visibility}`,
       async () => {
