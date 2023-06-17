@@ -20,10 +20,8 @@
 
 ## Limit
 
-- Only sync last 1000 memos.
 - if memo exist, cannot update the content. We don't want to break your content.
-- Cannot sync content from logseq to memos.
-- Cannot send image and files to Memos.
+- Cannot send image and files between Memos and logseq. (If you want this feature, welcome PR)
 
 ## ScreenShot
 

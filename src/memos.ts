@@ -47,7 +47,7 @@ class MemosSync {
         logseq.UI.showMsg("Memos Sync Success", "success");
       }
     } catch (e) {
-      console.error(e);
+      console.error("memos-sync: ",e);
       if (mode !== "Background") {
         logseq.UI.showMsg(String(e), "error");
       }
@@ -71,7 +71,7 @@ class MemosSync {
 
   private async sync() {
     await this.beforeSync();
-
+    
     let maxMemoId = await this.lastSyncId();
     let newMaxMemoId = maxMemoId;
     let end = false;
@@ -155,7 +155,7 @@ class MemosSync {
 
       this.backgroundConfigChange();
     } catch (e) {
-      console.error(e);
+      console.error("memos-sync: ",e);
       logseq.UI.showMsg("Memos OpenAPI is not a URL", "error");
     }
   }
@@ -163,7 +163,7 @@ class MemosSync {
   public async post(block: BlockEntity | null, visibility: Visibility) {
     try {
       if (block === null) {
-        console.error("block is not exits");
+        console.error("memos-sync: block is not exits");
         await logseq.UI.showMsg("block is not exits", "error");
         return;
       }
@@ -188,7 +188,7 @@ class MemosSync {
         await logseq.UI.showMsg("Post memo success");
       }
     } catch (error) {
-      console.error(error);
+      console.error("memos-sync: ",error);
       await logseq.UI.showMsg(String(error), "error");
     }
   }
@@ -270,7 +270,6 @@ class MemosSync {
     const blocks = await logseq.Editor.getPageBlocksTree(page);
 
     const inboxBlock = blocks.find((block: { content: string }) => {
-      console.log(block);
       return block.content === inboxName;
     });
 
@@ -298,6 +297,7 @@ class MemosSync {
     if (!parentBlock) {
       throw "Not able to create parent Block";
     }
+    console.debug('memos-sync: parentBlock', parentBlock)
     await logseq.Editor.insertBatchBlock(
       parentBlock.uuid,
       memoContentGenerate(
