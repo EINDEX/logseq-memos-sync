@@ -49,3 +49,12 @@
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=eindex/logseq-memos-sync&type=Date)](https://star-history.com/#eindex/logseq-memos-sync&Date)
+
+
+## Self Checking
+
+If you found data is not sync, please checking belows things:
+
+- Your memos server is reachable.
+- The property `memo-id` is not using, this can check by query: `{{query (or (property memoid ) (property memo-id ))}}`
+
