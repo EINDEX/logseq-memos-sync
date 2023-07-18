@@ -7,12 +7,3 @@ export type Memo = {
   displayTs: number;
   createdTs: number;
 };
-
-export type ListMemo = {
-  data: Memo[];
-};
-
-export type SingleMemo = {
-  data: Memo;
-  message: string;
-};

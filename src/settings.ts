@@ -23,10 +23,24 @@ export enum Visibility {
 export default function settingSchema() {
   logseq.useSettingsSchema([
     {
-      key: "openAPI",
+      key: "",
+      type: "heading",
+      default: "",
+      title: "Memos Connection",
+      description: "",
+    },
+    {
+      key: "host",
       type: "string",
       title: "Open API",
-      description: "Memos Open API, you can find this in memos setting",
+      description: "example: memos.com:8080",
+      default: "",
+    },
+    {
+      key: "openId",
+      type: "string",
+      title: "Open Id",
+      description: "Memos Open Id, you can find this in memos setting",
       default: "",
     },
     {
@@ -34,7 +48,7 @@ export default function settingSchema() {
       type: "heading",
       default: "",
       title: "Sync to Logseq",
-      description: "fetch infomation to Logseq",
+      description: "fetch memos to Logseq",
     },
 
     {
