@@ -13,10 +13,15 @@
 
 ## How to use
 
-1. Open plugin setting, setting up openAPI
-2. Open command panel
-3. Search for Sync Memos
-4. Run it
+1. Open plugin setting, setting up Memos openAPI
+
+### Manually Sync
+1. Open Logseq command panel, Win `Ctrl + Shift + P` or macOS `Command + Shift + P`.
+2. Search for Sync Memos
+3. Run it
+
+### Automatic Sync
+1. Open plugin setting and checked `autoSync` field.
 
 ## Limit
 
@@ -43,3 +48,12 @@
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=eindex/logseq-memos-sync&type=Date)](https://star-history.com/#eindex/logseq-memos-sync&Date)
+
+
+## Self Checking
+
+If you found data is not sync, please checking belows things:
+
+- Your memos server is reachable.
+- The property `memo-id` is not using, this can check by query: `{{query (or (property memoid ) (property memo-id ))}}`
+
