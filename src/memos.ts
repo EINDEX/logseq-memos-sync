@@ -2,7 +2,7 @@ import "@logseq/libs";
 import { BlockEntity, PageEntity } from "@logseq/libs/dist/LSPlugin";
 import { format } from "date-fns";
 import { BATCH_SIZE } from "./constants";
-import MemosClient from "./memos/client";
+import MemosGeneralClient, { MemosClient } from "./memos/client";
 import { Memo } from "./memos/type";
 import {
   formatContentWhenPush,
@@ -41,13 +41,22 @@ class MemosSync {
    * syncMemos
    */
   public async syncMemos(mode = "Manual") {
+    const { host, openId }: any = logseq.settings;
+    if (!host || !openId) {
+      logseq.UI.showMsg("Memos Setting up needed.");
+      logseq.showSettingsUI();
+    }
+    await this.choosingClient();
+    if (this.memosClient === undefined || this.memosClient === null) {
+      logseq.UI.showMsg("Memos Sync Setup issue", "error");
+    }
     try {
       await this.sync();
       if (mode !== "Background") {
         logseq.UI.showMsg("Memos Sync Success", "success");
       }
     } catch (e) {
-      console.error("memos-sync: ",e);
+      console.error("memos-sync: ", e);
       if (mode !== "Background") {
         logseq.UI.showMsg(String(e), "error");
       }
@@ -71,16 +80,16 @@ class MemosSync {
 
   private async sync() {
     await this.beforeSync();
-    
+
     let maxMemoId = await this.lastSyncId();
     let newMaxMemoId = maxMemoId;
     let end = false;
     let cousor = 0;
     while (!end) {
       const memos = await this.memosClient!.getMemos(
-        this.includeArchive!,
         BATCH_SIZE,
-        cousor
+        cousor,
+        this.includeArchive!
       );
       for (const memo of this.memosFitler(memos)) {
         if (memo.id <= maxMemoId) {
@@ -128,10 +137,16 @@ class MemosSync {
     }
   }
 
+  private async choosingClient() {
+    const { host, openId }: any = logseq.settings;
+    const client = new MemosGeneralClient(host, openId);
+    this.memosClient = await client.getClient();
+  }
+
   public parseSetting() {
+    this.configMigrate();
     try {
       const {
-        openAPI,
         mode,
         customPage,
         includeArchive,
@@ -142,7 +157,7 @@ class MemosSync {
         tagFilter,
         flat,
       }: any = logseq.settings;
-      this.memosClient = new MemosClient(openAPI);
+      this.choosingClient();
       this.mode = mode;
       this.autoSync = autoSync;
       this.customPage = customPage || "Memos";
@@ -155,7 +170,7 @@ class MemosSync {
 
       this.backgroundConfigChange();
     } catch (e) {
-      console.error("memos-sync: ",e);
+      console.error("memos-sync: ", e);
       logseq.UI.showMsg("Memos OpenAPI is not a URL", "error");
     }
   }
@@ -188,7 +203,7 @@ class MemosSync {
         await logseq.UI.showMsg("Post memo success");
       }
     } catch (error) {
-      console.error("memos-sync: ",error);
+      console.error("memos-sync: ", error);
       await logseq.UI.showMsg(String(error), "error");
     }
   }
@@ -297,7 +312,7 @@ class MemosSync {
     if (!parentBlock) {
       throw "Not able to create parent Block";
     }
-    console.debug('memos-sync: parentBlock', parentBlock)
+    console.debug("memos-sync: parentBlock", parentBlock);
     await logseq.Editor.insertBatchBlock(
       parentBlock.uuid,
       memoContentGenerate(
@@ -336,6 +351,19 @@ class MemosSync {
       rowStatus: "ARCHIVED",
     };
     return await this.memosClient!.updateMemo(memoId, payload);
+  }
+
+  private configMigrate() {
+    // memos v0 -> v1
+    const { openAPI, host, openId }: any = logseq.settings;
+    if (openAPI && !host && !openId) {
+      const memosUrl = new URL(openAPI);
+      logseq.updateSettings({
+        host: memosUrl.origin,
+        openId: memosUrl.searchParams.get("openId"),
+        openAPI: null,
+      });
+    }
   }
 }
 
