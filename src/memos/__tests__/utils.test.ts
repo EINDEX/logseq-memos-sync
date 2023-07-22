@@ -22,6 +22,7 @@ def hello():
       visibility: "PUBLIC",
       displayTs: 0,
       createdTs: 0,
+      resourceList: [],
     };
 
     const res = memoContentGenerate(memo, "TODO");

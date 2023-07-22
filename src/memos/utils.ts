@@ -32,6 +32,17 @@ export const memoContentGenerate = (
     `${BREAK_LINE}DONE $1 ${BREAK_LINE}`
   );
   const result = content.split(BREAK_LINE).filter((item) => !!item.trim());
+
+  const children: IBatchBlock[] = [];
+  if (memo.resourceList.length > 0){
+    for(let i = 0; i < memo.resourceList.length; i++) {
+      let resource = memo.resourceList[i];
+      children.push({
+        content: `![${resource.filename}](${resource.externalLink})`,
+      })
+    }
+  }
+
   return result
     .filter((item) => !!item.trim())
     .map((item) => {
@@ -41,6 +52,7 @@ export const memoContentGenerate = (
           "memo-id": memo.id,
         };
       }
+      data.children = children;
       return data;
     });
 };
