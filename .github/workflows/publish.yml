@@ -2,15 +2,17 @@
 
 name: Releases
 
-
 # Controls when the action will run.
 on:
   push:
     branches:
       - "main"
       - "release"
+  pull_request_target:
+    branches:
+      - "main"
+
   workflow_dispatch:
-    
 
 env:
   PLUGIN_NAME: logseq-memos-sync

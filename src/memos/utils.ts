@@ -1,5 +1,5 @@
 import { IBatchBlock } from "@logseq/libs/dist/LSPlugin";
-import { Mode } from "../settings";
+import { Mode, Visibility } from "../settings";
 import { Memo } from "./type";
 import { format } from "date-fns";
 
@@ -18,6 +18,8 @@ export const formatContentWhenPush = (content: string) => {
 
 export const memoContentGenerate = (
   memo: Memo,
+  host: string,
+  openId: string,
   preferredTodo: string,
   withProperties: boolean = false
 ): IBatchBlock[] => {
@@ -32,6 +34,22 @@ export const memoContentGenerate = (
     `${BREAK_LINE}DONE $1 ${BREAK_LINE}`
   );
   const result = content.split(BREAK_LINE).filter((item) => !!item.trim());
+
+  const children: IBatchBlock[] = [];
+  if (memo.resourceList.length > 0) {
+    for (const resource of memo.resourceList) {
+      let link;
+      if (resource.externalLink) {
+        link = resource.externalLink;
+      }else if(memo.visibility.toLowerCase() == Visibility.Public.toLowerCase()){
+        link = `${host}/o/r/${resource.id}`;
+      }else{
+        link = `${host}/o/r/${resource.id}?openId=${openId}`;
+      }
+      children.push({content: `![${resource.filename}](${link})`});
+    }
+  }
+
   return result
     .filter((item) => !!item.trim())
     .map((item) => {
@@ -41,6 +59,7 @@ export const memoContentGenerate = (
           "memo-id": memo.id,
         };
       }
+      data.children = children;
       return data;
     });
 };

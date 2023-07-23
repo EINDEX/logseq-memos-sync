@@ -32,6 +32,8 @@ class MemosSync {
   private timerId: NodeJS.Timer | undefined;
   private tagFilterList: Array<string> | undefined;
   private flat: boolean | undefined;
+  private host: string | undefined;
+  private openId: string | undefined;
 
   constructor() {
     this.parseSetting();
@@ -156,6 +158,8 @@ class MemosSync {
         archiveMemoAfterSync,
         tagFilter,
         flat,
+        host,
+        openId,
       }: any = logseq.settings;
       this.choosingClient();
       this.mode = mode;
@@ -167,6 +171,8 @@ class MemosSync {
       this.inboxName = inboxName || "#Memos";
       this.tagFilterList = tagFilterList(tagFilter);
       this.flat = flat;
+      this.host = host;
+      this.openId = openId;
 
       this.backgroundConfigChange();
     } catch (e) {
@@ -313,10 +319,17 @@ class MemosSync {
       throw "Not able to create parent Block";
     }
     console.debug("memos-sync: parentBlock", parentBlock);
+
+    if (!this.host || !this.openId) {
+      throw new Error("Host or OpenId is undefined");
+    }
+
     await logseq.Editor.insertBatchBlock(
       parentBlock.uuid,
       memoContentGenerate(
         memo,
+        this.host,
+        this.openId,
         preferredTodo,
         !this.archiveMemoAfterSync &&
           this.flat &&
