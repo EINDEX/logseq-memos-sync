@@ -51,6 +51,7 @@ class MemosSync {
     await this.choosingClient();
     if (this.memosClient === undefined || this.memosClient === null) {
       logseq.UI.showMsg("Memos Sync Setup issue", "error");
+      return
     }
     try {
       await this.sync();
@@ -142,7 +143,11 @@ class MemosSync {
   private async choosingClient() {
     const { host, openId }: any = logseq.settings;
     const client = new MemosGeneralClient(host, openId);
-    this.memosClient = await client.getClient();
+    try {
+      this.memosClient = await client.getClient();
+    } catch (error) {
+      console.error("memos-sync: get client error", error);
+    }
   }
 
   public parseSetting() {
