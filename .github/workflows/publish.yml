@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - "main"
-      - "release"
   pull_request_target:
     branches:
       - "main"
@@ -40,6 +39,6 @@ jobs:
         uses: montudor/action-zip@v1
       - name: Release
         run: npx semantic-release
-        if: github.ref_name == 'release'
+        if: startsWith(github.ref_name, 'v') && github.event_name == 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
