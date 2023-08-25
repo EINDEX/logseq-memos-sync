@@ -33,7 +33,7 @@ export default function settingSchema() {
       key: "host",
       type: "string",
       title: "Open API",
-      description: "example: https://memos.com:8080",
+      description: "example: memos.com:8080",
       default: "",
     },
     {
