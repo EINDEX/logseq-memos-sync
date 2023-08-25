@@ -51,7 +51,7 @@ class MemosSync {
     await this.choosingClient();
     if (this.memosClient === undefined || this.memosClient === null) {
       logseq.UI.showMsg("Memos Sync Setup issue", "error");
-      return
+      return;
     }
     try {
       await this.sync();
@@ -84,16 +84,22 @@ class MemosSync {
   private async sync() {
     await this.beforeSync();
 
+    if (this.memosClient === undefined || this.memosClient === null) {
+      await this.choosingClient();
+    }
+
     let maxMemoId = await this.lastSyncId();
     let newMaxMemoId = maxMemoId;
     let end = false;
     let cousor = 0;
+
     while (!end) {
       const memos = await this.memosClient!.getMemos(
         BATCH_SIZE,
         cousor,
         this.includeArchive!
       );
+
       for (const memo of this.memosFitler(memos)) {
         if (memo.id <= maxMemoId) {
           end = true;
@@ -220,6 +226,9 @@ class MemosSync {
   }
 
   private memosFitler(memos: Array<Memo>): Array<Memo> {
+    if (!memos) {
+      return []
+    }
     return memos.filter((memo) => {
       if (this.tagFilterList!.length === 0) {
         return true;
