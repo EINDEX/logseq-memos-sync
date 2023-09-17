@@ -41,6 +41,6 @@ jobs:
         uses: montudor/action-zip@v1
       - name: Release
         run: npx semantic-release
-        if: startsWith(github.ref_name, 'v') && github.event_name == 'push'
+        if: github.event_name == 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
