@@ -1,6 +1,6 @@
 import "@logseq/libs";
 import { BlockEntity, PageEntity } from "@logseq/libs/dist/LSPlugin";
-import { format } from "date-fns";
+import { format, max } from "date-fns";
 import { BATCH_SIZE } from "./constants";
 import MemosGeneralClient, { MemosClient } from "./memos/client";
 import { Memo } from "./memos/type";
@@ -34,6 +34,7 @@ class MemosSync {
   private flat: boolean | undefined;
   private host: string | undefined;
   private openId: string | undefined;
+  private token: string | undefined;
 
   constructor() {
     this.parseSetting();
@@ -43,7 +44,7 @@ class MemosSync {
    * syncMemos
    */
   public async syncMemos(mode = "Manual") {
-    const { host, token ,openId }: any = logseq.settings;
+    const { host, token, openId }: any = logseq.settings;
     if (!host || (!openId && !token)) {
       logseq.UI.showMsg("Memos Setting up needed.");
       logseq.showSettingsUI();
@@ -88,11 +89,10 @@ class MemosSync {
       await this.choosingClient();
     }
 
-    let maxMemoId = await this.lastSyncId();
+    let maxMemoId = (await this.lastSyncId()) || -1;
     let newMaxMemoId = maxMemoId;
     let end = false;
     let cousor = 0;
-
     while (!end) {
       const memos = await this.memosClient!.getMemos(
         BATCH_SIZE,
@@ -101,7 +101,7 @@ class MemosSync {
       );
 
       for (const memo of this.memosFitler(memos)) {
-        if (memo.id <= maxMemoId) {
+        if (memo.id <= maxMemoId && memo.pinned === false) {
           end = true;
           break;
         }
@@ -125,7 +125,7 @@ class MemosSync {
       }
       cousor += BATCH_SIZE;
     }
-    this.saveSyncId(newMaxMemoId);
+    await this.saveSyncId(newMaxMemoId);
   }
 
   public async autoSyncWhenStartLogseq() {
@@ -171,6 +171,7 @@ class MemosSync {
         flat,
         host,
         openId,
+        token,
       }: any = logseq.settings;
       this.choosingClient();
       this.mode = mode;
@@ -184,6 +185,7 @@ class MemosSync {
       this.flat = flat;
       this.host = host;
       this.openId = openId;
+      this.token = token;
 
       this.backgroundConfigChange();
     } catch (e) {
@@ -334,7 +336,7 @@ class MemosSync {
     }
     console.debug("memos-sync: parentBlock", parentBlock);
 
-    if (!this.host || !this.openId) {
+    if (!this.host || (!this.openId && !this.token)) {
       throw new Error("Host or OpenId is undefined");
     }
 
@@ -343,7 +345,6 @@ class MemosSync {
       memoContentGenerate(
         memo,
         this.host,
-        this.openId,
         preferredTodo,
         !this.archiveMemoAfterSync &&
           this.flat &&
