@@ -19,7 +19,6 @@ export const formatContentWhenPush = (content: string) => {
 export const memoContentGenerate = (
   memo: Memo,
   host: string,
-  openId: string,
   preferredTodo: string,
   withProperties: boolean = false
 ): IBatchBlock[] => {
@@ -43,8 +42,6 @@ export const memoContentGenerate = (
         link = resource.externalLink;
       }else if(memo.visibility.toLowerCase() == Visibility.Public.toLowerCase()){
         link = `${host}/o/r/${resource.id}`;
-      }else{
-        link = `${host}/o/r/${resource.id}?openId=${openId}`;
       }
       children.push({content: `![${resource.filename}](${link})`});
     }
