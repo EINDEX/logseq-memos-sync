@@ -3,11 +3,13 @@ import { Memo } from "../type";
 import { MemosClient } from "../client";
 
 export default class MemosClientV1 implements MemosClient {
-  private openId: string;
+  private openId: string | undefined;
   private host: string;
+  private token: string;
 
-  constructor(host: string, openId: string) {
+  constructor(host: string, token: string, openId?: string) {
     this.host = host;
+    this.token = token;
     this.openId = openId;
   }
 
@@ -17,15 +19,20 @@ export default class MemosClientV1 implements MemosClient {
     payload: any = null
   ): Promise<T> {
     try {
-      url.searchParams.append("openId", String(this.openId));
+      if (this.openId) {
+        url.searchParams.append("openId", String(this.openId));
+      }
       const resp: AxiosResponse<T> = await axios({
         method: method,
         url: url.toString(),
         data: payload,
+        headers: {
+          "Authorization": `Bearer ${this.token}`,
+        }
       });
       if (resp.status >= 400) {
         // @ts-ignore
-        throw resp.data?.message || "Error occurred";
+        throw resp.message || "Error occurred";
       } else if (resp.status >= 300) {
         throw "Something wrong!";
       } 

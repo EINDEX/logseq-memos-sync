@@ -8,24 +8,32 @@ type MemosAPIResponse<T> = {
 };
 
 export default class MemosClientV0 implements MemosClient {
-  private openId: string;
+  private openId: string | undefined;
   private host: string;
+  private token: string;
 
-  constructor(host:string, openId: string) {
+  constructor(host: string, token: string, openId?: string) {
     this.host = host;
     this.openId = openId;
+    this.token = token;
   }
 
   private async request<T>(
-    url: string,
+    url: URL,
     method: Method,
     payload: any
   ): Promise<T> {
     try {
+      if (this.openId) {
+        url.searchParams.append("openId", String(this.openId));
+      }
       const resp: AxiosResponse<MemosAPIResponse<T>> = await axios({
         method: method,
-        url: url,
+        url: url.toString(),
         data: payload,
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
       });
       if (resp.status !== 200) {
         throw "Something wrong!";
@@ -42,17 +50,16 @@ export default class MemosClientV0 implements MemosClient {
   public async getMemos(
     limit: number,
     offset: number,
-    includeArchive: boolean,
+    includeArchive: boolean
   ): Promise<Memo[]> {
     const url = new URL(`${this.host}/api/memo`);
-    url.searchParams.append("openId", String(this.openId));
     if (!includeArchive) {
       url.searchParams.append("rowStatus", "NORMAL");
     }
     url.searchParams.append("limit", limit.toString());
     url.searchParams.append("offset", offset.toString());
     try {
-      return await this.request<Memo[]>(url.toString(), "GET", {});
+      return await this.request<Memo[]>(url, "GET", {});
     } catch (error) {
       throw new Error(`Failed to get memos, ${error}`);
     }
@@ -63,9 +70,8 @@ export default class MemosClientV0 implements MemosClient {
     payload: Record<string, any>
   ): Promise<Memo> {
     const url = new URL(`${this.host}/api/memo/${memoId}`);
-    url.searchParams.append("openId", String(this.openId));
     try {
-      return await this.request<Memo>(url.toString(), "PATCH", payload);
+      return await this.request<Memo>(url, "PATCH", payload);
     } catch (error) {
       throw new Error(`Failed to update memo, ${error}.`);
     }
@@ -79,7 +85,7 @@ export default class MemosClientV0 implements MemosClient {
     const url = new URL(`${this.host}/api/memo`);
     url.searchParams.append("openId", String(this.openId));
     try {
-      return await this.request<Memo>(url.toString(), "POST", payload);
+      return await this.request<Memo>(url, "POST", payload);
     } catch (error) {
       throw new Error(`Failed to create memo, ${error}.`);
     }

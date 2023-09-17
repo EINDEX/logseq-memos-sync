@@ -37,10 +37,17 @@ export default function settingSchema() {
       default: "",
     },
     {
+      key: "token",
+      type: "string",
+      title: "Token",
+      description: " Your memos API token, you can find this in memos setting",
+      default: "",
+    },
+    {
       key: "openId",
       type: "string",
       title: "Open Id",
-      description: "Memos Open Id, you can find this in memos setting",
+      description: "Please upgrade memos to v0.15.0 switch to Memos Token. Memos OpenId, you can find this in memos setting.",
       default: "",
     },
     {

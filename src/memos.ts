@@ -43,8 +43,8 @@ class MemosSync {
    * syncMemos
    */
   public async syncMemos(mode = "Manual") {
-    const { host, openId }: any = logseq.settings;
-    if (!host || !openId) {
+    const { host, token ,openId }: any = logseq.settings;
+    if (!host || (!openId && !token)) {
       logseq.UI.showMsg("Memos Setting up needed.");
       logseq.showSettingsUI();
     }
@@ -147,8 +147,8 @@ class MemosSync {
   }
 
   private async choosingClient() {
-    const { host, openId }: any = logseq.settings;
-    const client = new MemosGeneralClient(host, openId);
+    const { host, token, openId }: any = logseq.settings;
+    const client = new MemosGeneralClient(host, token, openId);
     try {
       this.memosClient = await client.getClient();
     } catch (error) {
@@ -227,7 +227,7 @@ class MemosSync {
 
   private memosFitler(memos: Array<Memo>): Array<Memo> {
     if (!memos) {
-      return []
+      return [];
     }
     return memos.filter((memo) => {
       if (this.tagFilterList!.length === 0) {
