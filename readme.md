@@ -1,5 +1,9 @@
 # logseq-memos-sync
 
+> [!WARNING]  
+> The project was archived because I no longer use [Memos](https://github.com/usememos/memos).
+---
+
 > A memos sync plugin for logseq
 
 <a href="https://www.buymeacoffee.com/eindex"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=eindex&button_colour=40DCA5&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
