@@ -100,7 +100,7 @@ class MemosSync {
         this.includeArchive!
       );
 
-      for (const memo of this.memosFitler(memos)) {
+      for (const memo of this.memosFilter(memos)) {
         if (memo.id <= maxMemoId && memo.pinned === false) {
           end = true;
           break;
@@ -227,7 +227,7 @@ class MemosSync {
     }
   }
 
-  private memosFitler(memos: Array<Memo>): Array<Memo> {
+  private memosFilter(memos: Array<Memo>): Array<Memo> {
     if (!memos) {
       return [];
     }
