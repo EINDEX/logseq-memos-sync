@@ -28,7 +28,11 @@ export default class MemosClientV1 implements MemosClient {
         data: payload,
         headers: {
           "Authorization": `Bearer ${this.token}`,
-        }
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        decompress: true,
+        responseType: 'json'
       });
       if (resp.status >= 400) {
         // @ts-ignore
@@ -43,7 +47,7 @@ export default class MemosClientV1 implements MemosClient {
   }
 
   public async me() {
-    const url = new URL(`${this.host}/api/v1/user/me`);
+    const url = new URL(`${this.host}/api/v1/users/me`);
     return await this.request(url, "GET");
   }
 
@@ -52,14 +56,38 @@ export default class MemosClientV1 implements MemosClient {
     offset: number,
     includeArchive: boolean,
   ): Promise<Memo[]> {
-    const url = new URL(`${this.host}/api/v1/memo`);
-    if (!includeArchive) {
-      url.searchParams.append("rowStatus", "NORMAL");
+    const url = new URL(`${this.host}/api/v1/memos`);
+    // V1 API doesn't use filter for archive status
+    // It returns all memos by default, we'll filter in the response
+    url.searchParams.append("pageSize", limit.toString());
+    if (offset > 0) {
+      url.searchParams.append("pageToken", offset.toString());
     }
-    url.searchParams.append("limit", limit.toString());
-    url.searchParams.append("offset", offset.toString());
     try {
-      return await this.request<Memo[]>(url, "GET", {});
+      const response = await this.request<any>(url, "GET", {});
+      let memos = response.memos || [];
+      
+      // Filter out archived memos if needed
+      if (!includeArchive) {
+        memos = memos.filter((memo: any) => memo.state === 'NORMAL');
+      }
+      
+      // Transform V1 format to expected format
+      return memos.map((memo: any) => ({
+        id: parseInt(memo.name.split('/').pop() || '0'),
+        content: memo.content,
+        createdTs: Math.floor(new Date(memo.createTime).getTime() / 1000),
+        updatedTs: Math.floor(new Date(memo.updateTime).getTime() / 1000),
+        displayTs: Math.floor(new Date(memo.displayTime).getTime() / 1000),
+        rowStatus: memo.state,
+        visibility: memo.visibility,
+        pinned: memo.pinned || false,
+        creatorId: parseInt(memo.creator.split('/').pop() || '0'),
+        creatorName: memo.creator,
+        creatorUsername: memo.creator,
+        resourceList: memo.resources || [],
+        relationList: memo.relations || []
+      }));
     } catch (error) {
       throw new Error(`Failed to get memos, ${error}`);
     }
@@ -69,9 +97,31 @@ export default class MemosClientV1 implements MemosClient {
     memoId: number,
     payload: Record<string, any>
   ): Promise<Memo> {
-    const url = new URL(`${this.host}/api/v1/memo/${memoId}`);
+    const url = new URL(`${this.host}/api/v1/memos/${memoId}`);
+    const updatePayload: any = {};
+    
+    if (payload.content) updatePayload.content = payload.content;
+    if (payload.visibility) updatePayload.visibility = payload.visibility.toUpperCase();
+    if (payload.rowStatus === "ARCHIVED") updatePayload.row_status = "ARCHIVED";
+    
     try {
-      return await this.request<Memo>(url, "PATCH", payload);
+      const response = await this.request<any>(url, "PATCH", updatePayload);
+      // Transform V1 response to expected format
+      return {
+        id: parseInt(response.name.split('/').pop() || '0'),
+        content: response.content,
+        createdTs: Math.floor(new Date(response.createTime).getTime() / 1000),
+        updatedTs: Math.floor(new Date(response.updateTime).getTime() / 1000),
+        displayTs: Math.floor(new Date(response.displayTime).getTime() / 1000),
+        rowStatus: response.state,
+        visibility: response.visibility,
+        pinned: response.pinned || false,
+        creatorId: parseInt(response.creator.split('/').pop() || '0'),
+        creatorName: response.creator,
+        creatorUsername: response.creator,
+        resourceList: response.resources || [],
+        relationList: response.relations || []
+      };
     } catch (error) {
       throw new Error(`Failed to update memo, ${error}.`);
     }
@@ -80,11 +130,27 @@ export default class MemosClientV1 implements MemosClient {
   public async createMemo(content: string, visibility: string): Promise<Memo> {
     const payload = {
       content: content,
-      visibility: visibility,
+      visibility: visibility.toUpperCase(),
     };
-    const url = new URL(`${this.host}/api/v1/memo`);
+    const url = new URL(`${this.host}/api/v1/memos`);
     try {
-      return await this.request<Memo>(url, "POST", payload);
+      const response = await this.request<any>(url, "POST", payload);
+      // Transform V1 response to expected format
+      return {
+        id: parseInt(response.name.split('/').pop() || '0'),
+        content: response.content,
+        createdTs: Math.floor(new Date(response.createTime).getTime() / 1000),
+        updatedTs: Math.floor(new Date(response.updateTime).getTime() / 1000),
+        displayTs: Math.floor(new Date(response.displayTime).getTime() / 1000),
+        rowStatus: response.state,
+        visibility: response.visibility,
+        pinned: response.pinned || false,
+        creatorId: parseInt(response.creator.split('/').pop() || '0'),
+        creatorName: response.creator,
+        creatorUsername: response.creator,
+        resourceList: response.resources || [],
+        relationList: response.relations || []
+      };
     } catch (error) {
       throw new Error(`Failed to create memo, ${error}.`);
     }
