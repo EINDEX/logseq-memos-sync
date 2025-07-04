@@ -17,6 +17,7 @@ export default class MemosGeneralClient {
   private v0: MemosClientV0;
 
   constructor(host: string, token: string, openId?: string) {
+    console.log("memos-sync: MemosGeneralClient constructor - host:", host, "hasToken:", !!token, "hasOpenId:", !!openId);
     if (!openId && !token) {
       throw "Token not exist";
     }
@@ -25,14 +26,7 @@ export default class MemosGeneralClient {
   }
 
   public async getClient(): Promise<MemosClient> {
-    try {
-      await this.v1.me();
-      return this.v1;
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("Not Found")) {
-        return this.v0;
-      }
-      throw error;
-    }
+    console.log("memos-sync: Using Memos V1 API");
+    return this.v1;
   }
 }

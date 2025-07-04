@@ -52,15 +52,20 @@ export default class MemosClientV0 implements MemosClient {
     offset: number,
     includeArchive: boolean
   ): Promise<Memo[]> {
+    console.log("memos-sync: V0 getMemos called - limit:", limit, "offset:", offset, "includeArchive:", includeArchive);
     const url = new URL(`${this.host}/api/memo`);
     if (!includeArchive) {
       url.searchParams.append("rowStatus", "NORMAL");
     }
     url.searchParams.append("limit", limit.toString());
     url.searchParams.append("offset", offset.toString());
+    console.log("memos-sync: V0 API request URL:", url.toString());
     try {
-      return await this.request<Memo[]>(url, "GET", {});
+      const memos = await this.request<Memo[]>(url, "GET", {});
+      console.log("memos-sync: V0 - Retrieved", memos.length, "memos from API");
+      return memos;
     } catch (error) {
+      console.error("memos-sync: V0 getMemos error:", error);
       throw new Error(`Failed to get memos, ${error}`);
     }
   }
