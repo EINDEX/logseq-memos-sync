@@ -59,20 +59,20 @@ export const getMemoId = (properties: Record<string, any>): number | null => {
 };
 
 export const saveSyncStatus = async (lastSyncId: number) => {
-  const s = logseq.Assets.makeSandboxStorage();
-  await s.setItem(
-    "syncStatus.json",
-    JSON.stringify({ lastSyncId: lastSyncId })
-  );
+  await logseq.updateSettings({
+    syncStatus: { lastSyncId: lastSyncId }
+  });
 };
 
 export const fetchSyncStatus = async (
 ): Promise<{ lastSyncId: number }> => {
-  const s = logseq.Assets.makeSandboxStorage();
   try {
-    const syncStatusString = await s.getItem("syncStatus.json");
-    return JSON.parse(syncStatusString!);
+    const settings = logseq.settings;
+    if (settings?.syncStatus && typeof settings.syncStatus.lastSyncId === 'number') {
+      return settings.syncStatus;
+    }
+    return { lastSyncId: 0 };
   } catch (error) {    
-      return {lastSyncId : 0};
+    return { lastSyncId: 0 };
   }
 };

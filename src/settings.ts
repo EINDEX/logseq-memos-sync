@@ -163,5 +163,12 @@ export default function settingSchema() {
       description: "Flat all your result.",
       default: false,
     },
+    {
+      key: "syncStatus",
+      type: "object",
+      title: "Sync Status (Internal Use)",
+      description: "Internal sync status tracking - DO NOT MODIFY",
+      default: { lastSyncId: 0 },
+    },
   ]);
 }
