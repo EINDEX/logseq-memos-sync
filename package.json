@@ -40,5 +40,5 @@
     "id": "_eindex-logseq-memos-sync",
     "icon": "./logo.webp"
   },
-  "packageManager": "pnpm"
+  "packageManager": "pnpm@10.12.2"
 }
