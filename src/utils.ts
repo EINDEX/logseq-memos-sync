@@ -59,20 +59,26 @@ export const getMemoId = (properties: Record<string, any>): number | null => {
 };
 
 export const saveSyncStatus = async (lastSyncId: number) => {
-  const s = logseq.Assets.makeSandboxStorage();
-  await s.setItem(
-    "syncStatus.json",
-    JSON.stringify({ lastSyncId: lastSyncId })
-  );
+  console.log("memos-sync: Saving sync status - lastSyncId:", lastSyncId);
+  await logseq.updateSettings({
+    syncStatus: { lastSyncId: lastSyncId }
+  });
+  console.log("memos-sync: Sync status saved successfully");
 };
 
 export const fetchSyncStatus = async (
 ): Promise<{ lastSyncId: number }> => {
-  const s = logseq.Assets.makeSandboxStorage();
   try {
-    const syncStatusString = await s.getItem("syncStatus.json");
-    return JSON.parse(syncStatusString!);
-  } catch (error) {    
-      return {lastSyncId : 0};
+    const settings = logseq.settings;
+    console.log("memos-sync: Fetching sync status from settings:", settings?.syncStatus);
+    if (settings?.syncStatus && typeof settings.syncStatus.lastSyncId === 'number') {
+      console.log("memos-sync: Found sync status:", settings.syncStatus);
+      return settings.syncStatus;
+    }
+    console.log("memos-sync: No sync status found, returning default");
+    return { lastSyncId: 0 };
+  } catch (error) {
+    console.error("memos-sync: Error fetching sync status:", error);
+    return { lastSyncId: 0 };
   }
 };
