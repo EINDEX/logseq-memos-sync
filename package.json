@@ -12,26 +12,26 @@
   "license": "MIT",
   "dependencies": {
     "@logseq/libs": "^0.0.10",
-    "axios": "^1.2.0",
-    "date-fns": "^2.29.3"
+    "axios": "^1.10.0",
+    "date-fns": "^2.30.0"
   },
   "devDependencies": {
-    "@jest/globals": "^29.5.0",
+    "@jest/globals": "^29.7.0",
     "@semantic-release/changelog": "6.0.2",
     "@semantic-release/exec": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "@semantic-release/npm": "9.0.1",
-    "@types/jest": "^29.5.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "18.11.9",
     "@typescript-eslint/eslint-plugin": "5.45.0",
     "@typescript-eslint/parser": "5.45.0",
     "conventional-changelog-conventionalcommits": "5.0.0",
     "eslint": "8.28.0",
     "husky": "^8.0.3",
-    "jest": "^29.5.0",
-    "jest-environment-jsdom": "^29.5.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "semantic-release": "19.0.5",
-    "ts-jest": "^29.1.0",
+    "ts-jest": "^29.4.0",
     "typescript": "4.9.3",
     "vite": "3.2.7",
     "vite-plugin-logseq": "1.1.2"
@@ -39,5 +39,6 @@
   "logseq": {
     "id": "_eindex-logseq-memos-sync",
     "icon": "./logo.webp"
-  }
+  },
+  "packageManager": "pnpm@10"
 }
